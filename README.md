@@ -1,7 +1,7 @@
 # Benchmarks
 
 ## Results
-I compared the speed of R and Stata for typical data queries on a randomly generated dataset (similar to the ones used in the [data.table benchmarks](https://github.com/Rdatatable/data.table/wiki/Benchmarks-%3A-Grouping) run by Matt Dowle). The graph below presents the results I obtained for 1e8 observations (5GB dataset) - results are similar with more or fewer rows: [1e8](/output/1e8.png) and [2e6](/output/2e6.png).  
+I compared the speed of R and Stata for typical data queries on a randomly generated dataset (similar to the ones used in the [data.table benchmarks](https://github.com/Rdatatable/data.table/wiki/Benchmarks-%3A-Grouping) run by Matt Dowle). The graph below presents the results I obtained for 1e7 observations (500MB dataset) - results are similar with different number of rows: [1e8](/output/1e8.png) and [2e6](/output/2e6.png).  
 
 <img class = "img-responsive"  src="/output/1e7.png" />
 
