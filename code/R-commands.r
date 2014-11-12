@@ -1,13 +1,25 @@
+# All the packages below can be downloaded on CRAN
 options(mc.cores=4)
+library(data.table)
+library(tidyr)
+library(statar)
 library(biglm)
+library(lfe)
 
+
+# first create the file to merge with
+DT <- fread("merge.csv", showProgress=FALSE)
+saveRDS(DT, file = "merge.rds", compress = FALSE)
+
+
+# set of commands
 benchark <- function(file){
 	# write and read
 	out <- rep(NA, 24)
 	out[1] <- sum(system.time( DT <- fread(file, showProgress=FALSE) )[1:2])
-	out[2] <- sum(system.time( saveRDS(DT, file = "temp_r.rds", compress = FALSE) )[1:2])
+	out[2] <- sum(system.time( saveRDS(DT, file = "temp.rds", compress = FALSE) )[1:2])
 	rm(list = setdiff(ls(),"out")) 
-	out[3] <- sum(system.time( DT <- readRDS("temp_r.rds") )[1:2])
+	out[3] <- sum(system.time( DT <- readRDS("temp.rds") )[1:2])
 
 	# sort and duplicates  
 	out[4] <- sum(system.time(setkeyv(DT, c("id3")))[1:2])
@@ -17,8 +29,8 @@ benchark <- function(file){
 	out[8] <- sum(system.time(length(!duplicated(DT, by = c("id3"))))[1:2])
 
 	# merge 
-	DT <- readRDS("temp_r.rds") 
-	DT_merge <- readRDS("temp_merge_r.rds")
+	DT <- readRDS("temp.rds") 
+	DT_merge <- readRDS("merge.rds")
 	f <- function(){
 		setkey(DT, id1, id3)
 		setkey(DT_merge, id1, id3) 
@@ -32,7 +44,7 @@ benchark <- function(file){
 
 	# reshape
 	rm(list = setdiff(ls(),"out"))
-	DT <- readRDS("temp_r.rds") 
+	DT <- readRDS("temp.rds") 
 	DT1 <- unique(DT, by = c("id1", "id2", "id3"))
 	DT1 <- DT1[1:(nrow(DT1)/10)]
 	out[11] <- sum(system.time(DT2 <- gather(DT1, variable, value, id4, id5, id6, v1, v2, v3))[1:2])
@@ -51,7 +63,7 @@ benchark <- function(file){
 
 	# split apply combine
 	rm(list = setdiff(ls(),"out"))
-	DT <- readRDS("temp_r.rds") 
+	DT <- readRDS("temp.rds") 
 	out[14] <- sum(system.time( DT[, temp := sum(v3, na.rm = TRUE), by = id3] )[1:2])
 	DT[, temp := NULL] 
 	out[15] <- sum(system.time( DT[, temp := sum(v3, na.rm = TRUE), by = c("id3", "id2", "id1")] )[1:2])
@@ -65,8 +77,6 @@ benchark <- function(file){
 	DT1 <- DT[1:(nrow(DT)/10)]
 	out[19] <- sum(system.time( DT[, temp := sd(v3, na.rm = TRUE)), by = c("id3", "id2", "id1")] )[1:2])
 	DT[, temp := NULL] 
-
-	
 
 
 	# regress

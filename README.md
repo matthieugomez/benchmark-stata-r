@@ -16,61 +16,63 @@ The dataset and the code I used to produce these graphs are available below. Any
 
 ## Data and session info
 
+### Computer
+
 The machine used for this benchmark has a 2.9GHz i5 processor (4 cores),
 
-### R
-The script uses the packages `data.table`, `lfe`, `tidyr` and `statar`
+The version of Stata used is Stata 13 MP 4 cores. 
 The R session info is 
+
 ````R
-sessionInfo()
-#> R version 3.1.1 (2014-07-10)
-#> Platform: x86_64-apple-darwin13.1.0 (64-bit)
-#> 
-#> locale:
-#> [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-#> 
-#> attached base packages:
-#> [1] stats     graphics  grDevices utils     datasets  methods   base     
-#> 
-#> other attached packages:
-#> [1] speedglm_0.2     lfe_1.7-1289     Matrix_1.1-4     biglm_0.9-1      DBI_0.3.0       
-#> [6] stringr_0.6.2    dplyr_0.2.0.9001 data.table_1.9.3 reshape2_1.4    
-#> 
-#> loaded via a namespace (and not attached):
-#>  [1] assertthat_0.1  Formula_1.1-2   grid_3.1.1      lattice_0.20-29 lazyeval_0.1.5 
-#>  [6] magrittr_1.1.0  parallel_3.1.1  plyr_1.8.1      Rcpp_0.11.2     tools_3.1.1    
-#> [11] xtable_1.7-4   
+R version 3.1.1 (2014-07-10)
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] statar_0.1.3    lfe_1.7-1404     Matrix_1.1-4    tidyr_0.1.0.9000 data.table_1.9.5 
 ````
-
-### Stata
-
-The version of Stata used for this benchmark is Stata 13 MP 4 cores. I used the Stata program [distinct](https://ideas.repec.org/c/boc/bocode/s424201.html) and [reg2hdfe](https://ideas.repec.org/c/boc/bocode/s457101.html)
-
 
 ### Data
+
+I simulated datasets of various sizes using the following R script
+
 ````r
 library(data.table)
-N=2e6; K=100
+K <- 100
 set.seed(1)
-DT <- data.table(
-  id1 = sample(sprintf("id%03d",1:K), N, TRUE),      # large groups (char)
-  id2 = sample(sprintf("id%03d",1:K), N, TRUE),      # large groups (char)
-  id3 = sample(sprintf("id%010d",1:(N/K)), N, TRUE), # small groups (char)
-  id4 = sample(K, N, TRUE),                          # large groups (int)
-  id5 = sample(K, N, TRUE),                          # large groups (int)
-  id6 = sample(N/K, N, TRUE),                        # small groups (int)
-  v1 =  sample(5, N, TRUE),                          # int in range [1,5]
-  v2 =  sample(1e6, N, TRUE),                        # int in range [1,1e6]
-  v3 =  sample(round(runif(100,max=100),4), N, TRUE) # numeric e.g. 23.5749
-)
-write.table(DT,paste0("temp_",N,".csv"),row.names=F, sep="\t")
-setkey(DT, id, id3)
-DT_merge <-unique(DT)
-saveRDS(DT_merge,file="temp_r_gzip.rds") 
+for (file in c("2e6", "1e7", "1e8")){
+	N <- as.integer(file)
+	DT <- data.table(
+	  id1 = sample(sprintf("id%03d",1:K), N, TRUE),      # large groups (char)
+	  id2 = sample(sprintf("id%03d",1:K), N, TRUE),      # large groups (char)
+	  id3 = sample(sprintf("id%010d",1:(N/K)), N, TRUE), # small groups (char)
+	  id4 = sample(K, N, TRUE),                          # large groups (int)
+	  id5 = sample(K, N, TRUE),                          # large groups (int)
+	  id6 = sample(N/K, N, TRUE),                        # small groups (int)
+	  v1 =  sample(5, N, TRUE),                          # int in range [1,5]
+	  v2 =  sample(1e6, N, TRUE),                        # int in range [1,1e6]
+	  v3 =  sample(round(runif(100,max=100),4), N, TRUE) # numeric e.g. 23.5749
+	)
+	write.table(DT,paste0(file,".csv"),row.names=F, sep="\t")
+
+	if (file == "2e6"){
+		DT_merge <- unique(DT, by = c("id1", "id3"))
+		write.table(DT_merge,"merge.csv",row.names=F, sep="\t")
+	}
+}
 ````	
 
-The data files can
+If you run this script on your computer, it will create 4 files required in the R and Stata scripts: "2e6.csv", "1e7.csv" and "1e8.csv", and "merge.csv". You can also download directly [2e6.csv](http://www.princeton.edu/~mattg/data/2e6.csv) and [merge.csv](http://www.princeton.edu/~mattg/data/merge.csv)
 
 
 
-````
+
+
+### Code
+You can find the Stata and R script I used in the code folder of the repository. 
+

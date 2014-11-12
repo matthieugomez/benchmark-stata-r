@@ -1,18 +1,29 @@
-	set processors 4
-	drop _all
+/***************************************************************************************************
+The command distinct can be downloaded https://ideas.repec.org/c/boc/bocode/s424201.html
+
+The command regh2dfe can be dowloaded https://ideas.repec.org/c/boc/bocode/s457101.html
+***************************************************************************************************/
+
+/* first create the file to merge with */
+import delimited using merge.csv
+save using merge.dta
 
 
-foreach file in temp_1e8.csv{
+
+/* then execute the commands */
+set processors 4
+drop _all
+foreach file in "2e6csv" "1e7csv" "1e8.csv"{
 	/* write and read */
 	timer on 1
 	import delimited using "`file'", clear
 	timer off 1
 
 	timer on 2
-	save temp_stata, replace
+	save temp, replace
 	timer off 2
 	timer on 3
-	use temp_stata, clear
+	use temp, clear
 	timer off 3
 
 	/* sort  */
@@ -37,15 +48,15 @@ foreach file in temp_1e8.csv{
 	timer off 8
 
 	/* merge */
-	use temp_stata, clear
+	use temp, clear
 	timer on 9
-	merge m:1 id1 id3 using temp_merge_stata, keep(master matched) nogen
+	merge m:1 id1 id3 using merge, keep(master matched) nogen
 	timer off 9
 	
 	/* append */
-	use temp_stata, clear
+	use temp, clear
 	timer on 10
-	append using temp_stata
+	append using temp
 	timer off 10
 
 	/* reshape */
@@ -62,7 +73,7 @@ foreach file in temp_1e8.csv{
 	timer off 12
 
 	/* recode */
-	use temp_stata, clear
+	use temp, clear
 	timer on 13
 	gen v1_name = ""
 	replace v1_name = "first" if v1 == 1
