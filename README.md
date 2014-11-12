@@ -1,11 +1,7 @@
-benchmark-stata-r
-=================
-
-
 # Benchmarks
 
 ## Results
-I compared the speed of R and Stata for typical data queries on a randomly generated dataset (similar to the ones used in the [data.table benchmarks](https://github.com/Rdatatable/data.table/wiki/Benchmarks-%3A-Grouping) run by Matt Dowle). The graph below presents the results I obtained for 1e8 observations (5GB dataset) - results are similar with fewer rows: [1e7](http://www.princeton.edu/~mattg/statar/pictures/1e7.png) and [2e6](http://www.princeton.edu/~mattg/statar/pictures/2e6.png).  
+I compared the speed of R and Stata for typical data queries on a randomly generated dataset (similar to the ones used in the [data.table benchmarks](https://github.com/Rdatatable/data.table/wiki/Benchmarks-%3A-Grouping) run by Matt Dowle). The graph below presents the results I obtained for 1e8 observations (5GB dataset) - results are similar with fewer rows: [1e7](https://github.com/matthieugomez/benchmark-stata-r/output/1e7.png) and [2e6](https://github.com/matthieugomez/benchmark-stata-r/output/2e6.png).  
 <img class = "img-responsive"  src="http://www.princeton.edu/~mattg/statar/pictures/1e8.png" />
 
 I first timed commands that load datasets into memory. To open .csv, the data.table command `fread` is an order of magnitude faster than the corresponding Stata commands. Yet, this speed difference is reversed for datasets in proprietary formats (resp .dta for Stata and .rds for R): Stata is impressively fast to open and save .dta while base R opens .rds at approximately the same speed as `fread` opens .csv.
@@ -20,31 +16,11 @@ The dataset and the code I used to produce these graphs are available below. Any
 
 ## Data and session info
 
+The machine used for this benchmark has a 2.9GHz i5 processor (4 cores),
 
-
-````r
-library(data.table)
-N=2e6; K=100
-set.seed(1)
-DT <- data.table(
-  id1 = sample(sprintf("id%03d",1:K), N, TRUE),      # large groups (char)
-  id2 = sample(sprintf("id%03d",1:K), N, TRUE),      # large groups (char)
-  id3 = sample(sprintf("id%010d",1:(N/K)), N, TRUE), # small groups (char)
-  id4 = sample(K, N, TRUE),                          # large groups (int)
-  id5 = sample(K, N, TRUE),                          # large groups (int)
-  id6 = sample(N/K, N, TRUE),                        # small groups (int)
-  v1 =  sample(5, N, TRUE),                          # int in range [1,5]
-  v2 =  sample(1e6, N, TRUE),                        # int in range [1,1e6]
-  v3 =  sample(round(runif(100,max=100),4), N, TRUE) # numeric e.g. 23.5749
-)
-write.table(DT,paste0("temp_",N,".csv"),row.names=F, sep="\t")
-setkey(DT, id, id3)
-DT_merge <-unique(DT)
-saveRDS(DT_merge,file="temp_r_gzip.rds") 
-````	
-
-The machine used for this benchmark has a 2.9GHz i5 processor (4 cores),  with Stata 13 MP and R 3.1.1. The R session Info is
-
+### R
+The script uses the packages `data.table`, `lfe`, `tidyr` and `statar`
+The R session info is 
 ````R
 sessionInfo()
 #> R version 3.1.1 (2014-07-10)
@@ -66,7 +42,35 @@ sessionInfo()
 #> [11] xtable_1.7-4   
 ````
 
-I used the Stata program [distinct](https://ideas.repec.org/c/boc/bocode/s424201.html) and [reg2hdfe](https://ideas.repec.org/c/boc/bocode/s457101.html)
+### Stata
+
+The version of Stata used for this benchmark is Stata 13 MP 4 cores. I used the Stata program [distinct](https://ideas.repec.org/c/boc/bocode/s424201.html) and [reg2hdfe](https://ideas.repec.org/c/boc/bocode/s457101.html)
+
+
+### Data
+````r
+library(data.table)
+N=2e6; K=100
+set.seed(1)
+DT <- data.table(
+  id1 = sample(sprintf("id%03d",1:K), N, TRUE),      # large groups (char)
+  id2 = sample(sprintf("id%03d",1:K), N, TRUE),      # large groups (char)
+  id3 = sample(sprintf("id%010d",1:(N/K)), N, TRUE), # small groups (char)
+  id4 = sample(K, N, TRUE),                          # large groups (int)
+  id5 = sample(K, N, TRUE),                          # large groups (int)
+  id6 = sample(N/K, N, TRUE),                        # small groups (int)
+  v1 =  sample(5, N, TRUE),                          # int in range [1,5]
+  v2 =  sample(1e6, N, TRUE),                        # int in range [1,1e6]
+  v3 =  sample(round(runif(100,max=100),4), N, TRUE) # numeric e.g. 23.5749
+)
+write.table(DT,paste0("temp_",N,".csv"),row.names=F, sep="\t")
+setkey(DT, id, id3)
+DT_merge <-unique(DT)
+saveRDS(DT_merge,file="temp_r_gzip.rds") 
+````	
+
+The data files can
+
 
 
 ````
