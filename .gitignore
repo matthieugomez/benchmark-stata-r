@@ -1,6 +1,6 @@
 .*
 !/.gitignore
-!/output/results.csv
 *.csv
+!/output/results.csv
 *.rds
 *.dta
