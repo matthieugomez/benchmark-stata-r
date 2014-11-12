@@ -21,7 +21,7 @@ saveRDS(DT, file = "merge.rds", compress = FALSE)
 
 
 # Define a function with the set of commands
-benchark <- function(file){
+benchmark <- function(file){
 	# write and read
 	out <- rep(NA, 23)
 	out[1] <- sum(system.time( DT <- fread(file, showProgress=FALSE) )[1:2])
@@ -98,6 +98,6 @@ benchark <- function(file){
 
 
 # Run commands
-benchark("2e6.csv")
-benchark("1e7.csv")
-benchark("1e8.csv")
+benchmark("2e6.csv")
+benchmark("1e7.csv")
+benchmark("1e8.csv")
