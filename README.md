@@ -1,9 +1,9 @@
 # Benchmarks
 
 ## Results
-I compared the speed of R and Stata for typical data queries on a randomly generated dataset (similar to the ones used in the [data.table benchmarks](https://github.com/Rdatatable/data.table/wiki/Benchmarks-%3A-Grouping) run by Matt Dowle). The graph below presents the results I obtained for 1e8 observations (5GB dataset) - results are similar with more or fewer rows: [1e8](https://github.com/matthieugomez/benchmark-stata-r/output/1e8.png) and [2e6](https://github.com/matthieugomez/benchmark-stata-r/output/2e6.png).  
+I compared the speed of R and Stata for typical data queries on a randomly generated dataset (similar to the ones used in the [data.table benchmarks](https://github.com/Rdatatable/data.table/wiki/Benchmarks-%3A-Grouping) run by Matt Dowle). The graph below presents the results I obtained for 1e8 observations (5GB dataset) - results are similar with more or fewer rows: [1e8](/output/1e8.png) and [2e6](/output/2e6.png).  
 
-<img class = "img-responsive"  src="https://github.com/matthieugomez/benchmark-stata-r/output/1e7.png" />
+<img class = "img-responsive"  src="/output/1e7.png" />
 
 I first timed commands that load datasets into memory. To open .csv, the data.table command `fread` is an order of magnitude faster than the corresponding Stata commands. Yet, this speed difference is reversed for datasets in proprietary formats (resp .dta for Stata and .rds for R): Stata is impressively fast to open and save .dta while base R opens .rds at approximately the same speed as `fread` opens .csv.
 
