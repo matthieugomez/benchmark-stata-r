@@ -20,7 +20,7 @@ DT <- fread("merge.csv", showProgress=FALSE)
 saveRDS(DT, file = "merge.rds", compress = FALSE)
 
 
-# Define a function with the set of commands
+# defining the benchmark function
 benchmark <- function(file){
 	# write and read
 	out <- rep(NA, 23)
@@ -97,7 +97,7 @@ benchmark <- function(file){
 }
 
 
-# Run commands
+# run benchmark
 benchmark("2e6.csv")
 benchmark("1e7.csv")
 benchmark("1e8.csv")

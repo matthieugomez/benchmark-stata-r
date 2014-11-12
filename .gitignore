@@ -2,5 +2,6 @@
 !/.gitignore
 *.csv
 !/output/results.csv
+/output/results_graph.r
 *.rds
 *.dta

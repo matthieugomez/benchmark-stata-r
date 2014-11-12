@@ -40,11 +40,10 @@ for (file in c("2e6", "1e7", "1e8")){
 	  v2 =  sample(1e6, N, TRUE),                        # int in range [1,1e6]
 	  v3 =  sample(round(runif(100,max=100),4), N, TRUE) # numeric e.g. 23.5749
 	)
-	write.table(DT,paste0(file,".csv"),row.names=F, sep="\t")
-
+	write.table(DT, paste0(file, ".csv"), row.names = F, sep = "\t")
 	if (file == "2e6"){
 		DT_merge <- unique(DT, by = c("id1", "id3"))
-		write.table(DT_merge,"merge.csv",row.names=F, sep="\t")
+		write.table(DT_merge, "merge.csv", row.names = F, sep = "\t")
 	}
 }
 ````	
@@ -59,22 +58,23 @@ This script creates fourt files required in the R and Stata scripts: "2e6.csv", 
 I simulated four datasets using the file (2-benchmark-r.r)[code/2-benchmark-r.r]:
 
 ```R
-# All the packages below can be downloaded on CRAN
-options(mc.cores=4)
+# loading packages
 library(data.table)
 library(tidyr)
 library(statar)
 library(biglm)
 library(lfe)
 
+# setting options
+options(mc.cores=4)
 
-# first create the file to merge with
+# creating the file to merge with
 DT <- fread("merge.csv", showProgress=FALSE)
 saveRDS(DT, file = "merge.rds", compress = FALSE)
 
 
-# set of commands
-benchark <- function(file){
+# defining the benchmark function
+benchmark <- function(file){
 	# write and read
 	out <- rep(NA, 23)
 	out[1] <- sum(system.time( DT <- fread(file, showProgress=FALSE) )[1:2])
@@ -136,7 +136,7 @@ benchark <- function(file){
 	out[18] <-sum(system.time( DT[, temp := mean(v3, na.rm = TRUE) , by = c("id1", "id2", "id3", "id4", "id5", "id6")] )[1:2])
 	DT[, temp := NULL]
 	DT1 <- DT[1:(nrow(DT)/10)]
-	out[19] <- sum(system.time( DT[, temp := sd(v3, na.rm = TRUE)), by = c("id3", "id2", "id1")] )[1:2])
+	out[19] <- sum(system.time( DT[, temp := sd(v3, na.rm = TRUE), by = c("id3", "id2", "id1")] )[1:2])
 	DT[, temp := NULL] 
 
 
@@ -149,9 +149,11 @@ benchark <- function(file){
 	out
 }
 
-benchark("temp_2e6.csv")
-benchark("temp_1e7.csv")
-benchark("temp_1e8.csv")
+
+# run benchmark
+benchmark("2e6.csv")
+benchmark("1e7.csv")
+benchmark("1e8.csv")
 ```
 
 ### Stata code
@@ -160,21 +162,21 @@ I simulated four datasets using the file (3-benchmark-stata.do)[code/3-benchmark
 
 ```
 /***************************************************************************************************
-The command distinct can be downloaded https://ideas.repec.org/c/boc/bocode/s424201.html
+The command distinct can be downloaded here: https://ideas.repec.org/c/boc/bocode/s424201.html
 
-The command regh2dfe can be dowloaded https://ideas.repec.org/c/boc/bocode/s457101.html
+The command regh2dfe can be dowloaded here: https://ideas.repec.org/c/boc/bocode/s457101.html
 ***************************************************************************************************/
-
-/* first create the file to merge with */
-import delimited using merge.csv
-save using merge.dta
-
-
-
-/* then execute the commands */
-set processors 4
+/* set options */
 drop _all
-foreach file in "2e6csv" "1e7csv" "1e8.csv"{
+set processors 4
+
+/* create the file to merge with */
+import delimited using merge.csv
+save merge.dta
+
+
+/* Execute the commands */
+foreach file in "2e6.csv" "1e7.csv" "1e8.csv"{
 	/* write and read */
 	timer on 1
 	import delimited using "`file'", clear
