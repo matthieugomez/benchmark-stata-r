@@ -13,7 +13,11 @@ Then I estimated typical regression models. R is much slower than Stata to estim
 
 In summary, Stata appears to be much more optimized than base R for typical data manipulations. Yet, this difference is completely reversed once one takes into account recent R packages such as `data.table` and `felm`. These packages, mostly written in C, make R an order of magnitude faster than Stata for common data analysis.
 
-The dataset and the code I used to produce these graphs are available below. Any feedback is welcome!
+The dataset and the code I used to produce these graphs are available below. 
+
+If you are a Stata user and you want to know more about R, you may be interested in other things I wrote: an [online guide to R](http://www.princeton.edu/~mattg/statar/) and the [statar package](http://cran.r-project.org/package=statar).
+
+Any feedback is welcome!
 
 
 ## Code
@@ -22,7 +26,7 @@ All the code below can be downloaded in the code folder in the repository.
 
 ### Data
 
-I simulated four datasets using the file (1-generate-datasets.r)[code/1-generate-datasets.r]:
+I simulated four datasets using the file [1-generate-datasets.r](code/1-generate-datasets.r):
 
 ````r
 library(data.table)
@@ -56,9 +60,16 @@ This script creates fourt files required in the R and Stata scripts: "2e6.csv", 
 
 ### R Code
 
-I simulated four datasets using the file (2-benchmark-r.r)[code/2-benchmark-r.r]:
+I runned the R script in the file [2-benchmark-r.r](code/2-benchmark-r.r):
 
 ```R
+# To run the script, you first need to ownload the relevant packages:
+# install.packages("data.table")
+# install.packages("tidyr")
+# install.packages("statar")
+# install.packages("biglm")
+# install.packages("lfe")
+
 # loading packages
 library(data.table)
 library(tidyr)
@@ -74,44 +85,49 @@ DT <- fread("merge.csv", showProgress=FALSE)
 saveRDS(DT, file = "merge.rds", compress = FALSE)
 
 
+# defining the time function
+time <- function(x){sum(system.time(x)[1:2])}
+
 # defining the benchmark function
 benchmark <- function(file){
+	out <- NULL
+	csvfile <- paste0(file, ".csv")
+	rdsfile <- paste0(file, ".rds")
 	# write and read
-	out <- rep(NA, 23)
-	out[1] <- sum(system.time( DT <- fread(file, showProgress=FALSE) )[1:2])
-	out[2] <- sum(system.time( saveRDS(DT, file = "temp.rds", compress = FALSE) )[1:2])
+	out[length(out)+1] <- time(DT <- fread(csvfile, showProgress=FALSE))
+	out[length(out)+1] <- time(saveRDS(DT, file = rdsfile, compress = FALSE))
 	rm(list = setdiff(ls(),"out")) 
-	out[3] <- sum(system.time( DT <- readRDS("temp.rds") )[1:2])
+	out[length(out)+1] <- time(DT <- readRDS(rdsfile))
 
 	# sort and duplicates  
-	out[4] <- sum(system.time(setkeyv(DT, c("id3")))[1:2])
-	out[5] <- sum(system.time(setkeyv(DT, c("id6")))[1:2])
-	out[6] <- sum(system.time(setkeyv(DT, c("v3")))[1:2])
-	out[7] <- sum(system.time(setkeyv(DT, c("id1","id2","id3", "id4", "id5", "id6")))[1:2])
-	out[8] <- sum(system.time(sum(!duplicated(DT, by = c("id3"))))[1:2])
+	out[length(out)+1] <- time(setkeyv(DT, c("id3")))
+	out[length(out)+1] <- time(setkeyv(DT, c("id6")))
+	out[length(out)+1] <- time(setkeyv(DT, c("v3")))
+	out[length(out)+1] <- time(setkeyv(DT, c("id1","id2","id3", "id4", "id5", "id6")))
+	out[length(out)+1] <- time(sum(!duplicated(DT, by = c("id3"))))
 
 	# merge 
-	DT <- readRDS("temp.rds") 
+	DT <- readRDS(rdsfile) 
 	DT_merge <- readRDS("merge.rds")
 	f <- function(){
 		setkey(DT, id1, id3)
 		setkey(DT_merge, id1, id3) 
 		merge(DT, DT_merge, all.x = TRUE, all.y = FALSE) 
 	}
-	out[9] <- sum(system.time(f())[1:2])
+	out[length(out)+1] <- time(f())
 
 	# append 
 	DT1 <- copy(DT) 
-	out[10] <- sum(system.time(rbindlist(list(DT,DT1), fill = TRUE) )[1:2])
+	out[length(out)+1] <- time(rbindlist(list(DT,DT1), fill = TRUE))
 
 	# reshape
 	rm(list = setdiff(ls(),"out"))
-	DT <- readRDS("temp.rds") 
+	DT <- readRDS(rdsfile) 
 	DT1 <- unique(DT, by = c("id1", "id2", "id3"))
 	DT1 <- DT1[1:(nrow(DT1)/10)]
-	out[11] <- sum(system.time(DT2 <- gather(DT1, variable, value, id4, id5, id6, v1, v2, v3))[1:2])
+	out[length(out)+1] <- time(DT2 <- gather(DT1, variable, value, id4, id5, id6, v1, v2, v3))
 	rm(DT1) 
-	out[12] <- sum(system.time(DT3 <- spread(DT2, variable, value))[1:2])
+	out[length(out)+1] <- time(DT3 <- spread(DT2, variable, value))
 	rm(list = c("DT2", "DT3"))
 
 	# recode
@@ -120,52 +136,59 @@ benchmark <- function(file){
 		DT[v1 %in% c(2,3), v1_name := "second"]
 		DT[v1 %in% c(4,5), v1_name := "third"]
 	}
-	out[13] <- sum(system.time(f())[1:2])
+	out[length(out)+1] <- time(f())
 	DT[, v1_name := NULL]
 
+	# functions
+	out[length(out)+1] <- time(DT[, temp := bin(v3, 10)])
+	DT[, temp := NULL] 
+	out[length(out)+1] <- time(DT[, temp := .GRP, by = id3])
+	DT[, temp := NULL] 
+	
 	# split apply combine
 	rm(list = setdiff(ls(),"out"))
-	DT <- readRDS("temp.rds") 
-	out[14] <- sum(system.time( DT[, temp := sum(v3, na.rm = TRUE), by = id3] )[1:2])
+	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = id3])
 	DT[, temp := NULL] 
-	out[15] <- sum(system.time( DT[, temp := sum(v3, na.rm = TRUE), by = c("id3", "id2", "id1")] )[1:2])
+	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id3", "id2", "id1")])
 	DT[, temp := NULL] 
-	out[16] <- sum(system.time( DT[, temp := mean(v3, na.rm = TRUE) , by = id6] )[1:2])
+	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = id6])
 	DT[, temp := NULL] 
-	out[17] <- sum(system.time( DT[, temp := mean(v3, na.rm = TRUE) , by = c("id6", "id5", "id4")] )[1:2])
+	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id6", "id5", "id4")])
 	DT[, temp := NULL] 
-	out[18] <-sum(system.time( DT[, temp := mean(v3, na.rm = TRUE) , by = c("id1", "id2", "id3", "id4", "id5", "id6")] )[1:2])
+	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id1", "id2", "id3", "id4", "id5", "id6")])
 	DT[, temp := NULL]
 	DT1 <- DT[1:(nrow(DT)/10)]
-	out[19] <- sum(system.time( DT[, temp := sd(v3, na.rm = TRUE), by = c("id3", "id2", "id1")] )[1:2])
+	out[length(out)+1] <- time(DT1[, temp := sd(v3, na.rm = TRUE), by = id3])
 	DT[, temp := NULL] 
 
-
 	# regress
-	out[20] <- sum(system.time( biglm(v3 ~ v2 + id4 + id5 + id6, DT1) )[1:2])
-	out[21] <- sum(system.time( biglm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1), DT1) )[1:2])
-	out[22] <- sum(system.time( felm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1) | id1 | 0 | id1, DT1) )[1:2])
-	out[23] <- sum(system.time( felm(v3 ~ v2 + id4 + id5 + id6  | id1 + id2 | 0 | id1, DT1) )[1:2])
+	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6, DT1))
+	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1), DT1))
+	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1) | id1 | 0 | id1, DT1))
+	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6  | id1 + id2 | 0 | id1, DT1))
 	# return time vector
 	out
 }
 
 
 # run benchmark
-benchmark("2e6.csv")
-benchmark("1e7.csv")
-benchmark("1e8.csv")
+benchmark("2e6")
+benchmark("1e7")
+benchmark("1e8")
 ```
 
 ### Stata code
 
-I simulated four datasets using the file (3-benchmark-stata.do)[code/3-benchmark-stata.do]:
+I runned the Stata script in the file [3-benchmark-stata.do](code/3-benchmark-stata.do):
 
 ```
 /***************************************************************************************************
 The command distinct can be downloaded here: https://ideas.repec.org/c/boc/bocode/s424201.html
 
 The command regh2dfe can be dowloaded here: https://ideas.repec.org/c/boc/bocode/s457101.html
+
+The command fastxtile can be dowloaded here: https://ideas.repec.org/c/boc/bocode/s457710.html
+
 ***************************************************************************************************/
 /* set options */
 drop _all
@@ -173,55 +196,99 @@ set processors 4
 
 /* create the file to merge with */
 import delimited using merge.csv
-save merge.dta
+save merge.dta, replace
 
 
 /* Execute the commands */
-foreach file in "2e6.csv" "1e7.csv" "1e8.csv"{
+cap program drop benchmark
+program define benchmark, rclass
+	quietly{
+	local i = 0
 	/* write and read */
+	timer clear
 	timer on 1
-	import delimited using "`file'", clear
-	timer off 1
+	import delimited using `0'.csv, clear
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 
-	timer on 2
-	save temp, replace
-	timer off 2
-	timer on 3
-	use temp, clear
-	timer off 3
+	timer clear
+	timer on 1
+	save `0'.dta, replace
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+
+	timer clear
+	timer on 1
+	use `0'.dta, clear
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 
 	/* sort  */
-	timer on 4
+	timer clear
+	timer on 1
 	sort id3 
-	timer off 4
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 
-	timer on 5
+	timer clear
+	timer on 1
 	sort id6
-	timer off 5
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 
-	timer on 6
+	timer clear
+	timer on 1
 	sort v3
-	timer off 6
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 
-	timer on 7
+	timer clear
+	timer on 1
 	sort id1 id2 id3 id4 id5 id6
-	timer off 7
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 
-	timer on 8
+	timer clear
+	timer on 1
 	distinct id3
-	timer off 8
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 
 	/* merge */
-	use temp, clear
-	timer on 9
+	use `0'.dta, clear
+	timer clear
+	timer on 1
 	merge m:1 id1 id3 using merge, keep(master matched) nogen
-	timer off 9
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 	
 	/* append */
-	use temp, clear
-	timer on 10
-	append using temp
-	timer off 10
+	use `0'.dta, clear
+	timer clear
+	timer on 1
+	append using `0'.dta
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 
 	/* reshape */
 	bys id1 id2 id3: keep if _n == 1
@@ -229,78 +296,162 @@ foreach file in "2e6.csv" "1e7.csv" "1e8.csv"{
 	foreach v of varlist id4 id5 id6 v1 v2 v3{
 		rename `v' v_`v'
 	}
-	timer on 11
+	timer clear
+	timer on 1
 	reshape long v_, i(id1 id2 id3) j(variable) string
-	timer off 11
-	timer on 12
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+	timer clear
+	timer on 1
 	reshape wide v_, i(id1 id2 id3) j(variable) string
-	timer off 12
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 
 	/* recode */
-	use temp, clear
-	timer on 13
+	use `0'.dta, clear
+	timer clear
+	timer on 1
 	gen v1_name = ""
 	replace v1_name = "first" if v1 == 1
 	replace v1_name = "second" if inlist(v1, 2, 3)
 	replace v1_name = "third" if inlist(v1, 4, 5)
-	timer off 13
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 	drop v1_name
 
+	/* functions */
+	timer clear
+	timer on 1
+	fastxtile temp = v3, n(10)
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+	drop temp
+
+	timer clear
+	timer on 1
+	egen temp = group(id3)
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+	drop temp
+	
 	/* split apply combine */ 
-	timer on 14
+	timer clear
+	timer on 1
 	egen temp = sum(v3), by(id3)
-	timer off 14
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 	drop temp
 
-	timer on 15
+	timer clear
+	timer on 1
 	egen temp = sum(v3), by(id3 id2 id1)
-	timer off 15
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 	drop temp
 
-	timer on 16
+	timer clear
+	timer on 1
 	egen temp = mean(v3), by(id6)
-	timer off 16
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 	drop temp
 
-	timer on 17
+	timer clear
+	timer on 1
 	egen temp = mean(v3),by(id6 id5 id4)
-	timer off 17
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 	drop temp
 
-	timer on 18
+	timer clear
+	timer on 1
 	egen temp = mean(v3), by(id1 id2 id3 id4 id5 id6)	
-	timer off 18
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 	drop temp
 
-	timer on 19
+
 	keep if _n < _N/10
-	egen temp = sd(v3), by(id3 id2 id1)
-	timer off 19
+
+	timer clear
+	timer on 1
+	egen temp = sd(v3), by(id3)
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
 	drop temp
 
 
 	/* regress */
-	timer on 20
-	reg v3 v2 id4 id5 id6
-	timer off 20
-
-	timer on 21
-	reg v3 v2 id4 id5 id6 i.v1
-	timer off 21
-
-	timer on 22
-	areg v3 v2 id4 id5 id6 i.v1, a(id1) cl(id1)
-	timer off 22
-
-	egen g1 = group(id1)
-	egen g2 = group(id2)
-	timer on 23
-	reg2hdfe v3 v2 id4 id5 id6, id1(g1) id2(g2) cluster(g1)
-	timer off 23
-
-	timer list
 	timer clear
-}
+	timer on 1
+	reg v3 v2 id4 id5 id6
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+
+	timer clear
+	timer on 1
+	reg v3 v2 id4 id5 id6 i.v1
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+
+	timer clear
+	timer on 1
+	areg v3 v2 id4 id5 id6 i.v1, a(id1) cl(id1)
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+
+	egen g1=group(id1)
+	egen g2=group(id2)
+	timer clear
+	timer on 1
+	reghdfe v3 v2 id4 id5 id6, absorb(g1 g2) vce(cluster g1)  tolerance(1e-6) fast
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+	}
+end
+
+
+return clear
+benchmark 2e6
+return list, all
+
+return clear
+benchmark 1e7
+return list, all
+
+return clear
+benchmark 1e8
+return list, all
 ```
 
 
