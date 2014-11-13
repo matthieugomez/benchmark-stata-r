@@ -128,10 +128,10 @@ foreach file in "2e6.csv" "1e7.csv" "1e8.csv"{
 	areg v3 v2 id4 id5 id6 i.v1, a(id1) cl(id1)
 	timer off 22
 
-	egen g1 = group(id1)
-	egen g2 = group(id2)
 	timer on 23
-	reg2hdfe v3 v2 id4 id5 id6, id1(g1) id2(g2) cluster(g1)
+	egen g1=group(id1)
+	egen g2=group(id2)
+	reghdfe v3 v2 id4 id5 id6, absorb(g1 g2) vce(cluster g1)  tolerance(1e-6) fast
 	timer off 23
 
 	timer list
