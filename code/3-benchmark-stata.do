@@ -244,10 +244,10 @@ program define benchmark, rclass
 	local i = `i' + 1
 	return scalar cmd`i' = r(t1)
 
-	timer clear
-	timer on 1
 	egen g1=group(id1)
 	egen g2=group(id2)
+	timer clear
+	timer on 1
 	reghdfe v3 v2 id4 id5 id6, absorb(g1 g2) vce(cluster g1)  tolerance(1e-6) fast
 	timer off 1
 	timer list
