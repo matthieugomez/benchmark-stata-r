@@ -34,7 +34,7 @@ benchmark <- function(file){
 	out[5] <- sum(system.time(setkeyv(DT, c("id6")))[1:2])
 	out[6] <- sum(system.time(setkeyv(DT, c("v3")))[1:2])
 	out[7] <- sum(system.time(setkeyv(DT, c("id1","id2","id3", "id4", "id5", "id6")))[1:2])
-	out[8] <- sum(system.time(length(!duplicated(DT, by = c("id3"))))[1:2])
+	out[8] <- sum(system.time(sum(!duplicated(DT, by = c("id3"))))[1:2])
 
 	# merge 
 	DT <- readRDS("temp.rds") 
