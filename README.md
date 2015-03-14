@@ -1,24 +1,28 @@
 # Benchmarks
 
 ## Results
-I compared the speed of R and Stata for typical data queries on a randomly generated dataset (similar to the ones used in the [data.table benchmarks](https://github.com/Rdatatable/data.table/wiki/Benchmarks-%3A-Grouping) run by Matt Dowle). The graph below presents the results I obtained for 1e7 observations (500MB dataset) - results are similar with different number of rows: [1e8](/output/1e8.png) and [2e6](/output/2e6.png).  
+This page compares speed of R and Stata for typical data analysis on a randomly [generated dataset](https://github.com/Rdatatable/data.table/wiki/Benchmarks-%3A-Grouping) of 50 MO, 500 MO, and 5 GO. The graph below shows the results for the 500MB dataset (1e7 observations).
 
 <img class = "img-responsive"  src="/output/1e7.png" />
 
-I first timed commands that load datasets into memory. To open .csv, the data.table command `fread` is an order of magnitude faster than the corresponding Stata commands. Yet, this speed difference is reversed for datasets in proprietary formats (resp .dta for Stata and .rds for R): Stata is impressively fast to open and save .dta while base R opens .rds at approximately the same speed as `fread` opens .csv.
 
-I then tested a wide range of typical data manipulations, which constitute the bulk of my typical work. For those, the package `data.table` is much, much faster than Stata. Crucial commands such as sorting, executing functions within groups, reshaping and joining datasets are in average one order of magnitude faster in R. 
+### loading data
+R wins to read `.csv`: the data.table command `fread` is ten times faster than the Stata commands `insheet`. When reading or saving data in proprietary format (`.dta` for Stata and `.rds` for R), Stata is 100x faster than R.
 
-Then I estimated typical regression models. R is much slower than Stata to estimate simple regressions - even through packages such as `biglm` or `speedlm`. The difference becomes particularly important with larger datasets. I'd like to understand better this speed difference : one reason may be that Stata `reg` is multi threaded while `biglm` does not use parallel computation [yet](http://notstatschat.tumblr.com/post/54900159212/big-data-linear-models). That said, for models with high dimensional fixed effect(s), `felm` (from the package `lfe`) is faster than the corresponding Stata commands `areg/reg2hdfe/reg3hdfe`. Since `felm` embeds an algorithm to speed up within transformations of multiple factors (see the author's [article](http://journal.r-project.org/archive/2013-2/gaure.pdf), this gap increases with the number of high dimensional fixed effects
+## data manipulation
+The package `data.table` is 10x faster than Stata for the four crucial commands of data cleaning (sort, apply functions within groups, reshape datasets, join datasets).
 
-In summary, Stata appears to be much more optimized than base R for typical data manipulations. Yet, this difference is completely reversed once one takes into account recent R packages such as `data.table` and `felm`. These packages, mostly written in C, make R an order of magnitude faster than Stata for common data analysis.
+### regression models.
+R is much slower than Stata to estimate linear models (even using specialized packages such as `biglm` or `speedlm`). I don't really understand why - one reason may be that Stata `reg` is multi threaded. 
+
+For models with high dimensional fixed effect(s), `felm` is faster than the corresponding Stata commands (`areg/reghdfe)` (`felm` embeds an algorithm to speed up within transformations of multiple factors as described [here](http://journal.r-project.org/archive/2013-2/gaure.pdf).
+
+## Conclusion
+In conclusion, R is generally faster to use than Stata, especially for data-cleaning of large datasets.
+
 
 The dataset and the code I used to produce these graphs are available below. 
-
 If you are a Stata user and you want to know more about R, you may be interested in other things I wrote: an [online guide to R](http://www.princeton.edu/~mattg/statar/) and the [statar package](http://cran.r-project.org/package=statar).
-
-Any feedback is welcome!
-
 
 ## Code
 
@@ -53,7 +57,7 @@ for (file in c("2e6", "1e7", "1e8")){
 }
 ````	
 
-This script creates fourt files required in the R and Stata scripts: "2e6.csv", "1e7.csv" and "1e8.csv", and "merge.csv". You can also download directly [2e6.csv](http://www.princeton.edu/~mattg/data/2e6.csv) and [merge.csv](http://www.princeton.edu/~mattg/data/merge.csv)
+This script creates four files required in the R and Stata scripts: "2e6.csv", "1e7.csv" and "1e8.csv", and "merge.csv". You can also download directly [2e6.csv](http://www.princeton.edu/~mattg/data/2e6.csv) and [merge.csv](http://www.princeton.edu/~mattg/data/merge.csv)
 
 
 

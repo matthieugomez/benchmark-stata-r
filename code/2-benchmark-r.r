@@ -92,7 +92,7 @@ benchmark <- function(file){
 	DT[, temp := NULL] 
 	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id1", "id2", "id3", "id4", "id5", "id6")])
 	DT[, temp := NULL]
-	DT1 <- DT[1:(nrow(DT)/10)]
+	DT1 <- DT[1:(nrow(DT)/2)]
 	out[length(out)+1] <- time(DT1[, temp := sd(v3, na.rm = TRUE), by = id3])
 	DT[, temp := NULL] 
 

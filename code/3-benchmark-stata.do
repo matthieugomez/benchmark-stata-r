@@ -108,7 +108,7 @@ program define benchmark, rclass
 
 	/* reshape */
 	bys id1 id2 id3: keep if _n == 1
-	keep if _n<_N/10
+	keep if _n < _N/10
 	foreach v of varlist id4 id5 id6 v1 v2 v3{
 		rename `v' v_`v'
 	}
@@ -207,7 +207,7 @@ program define benchmark, rclass
 	drop temp
 
 
-	keep if _n < _N/10
+	keep if _n < _N/2
 
 	timer clear
 	timer on 1
