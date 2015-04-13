@@ -20,7 +20,7 @@ DT <- fread("merge.csv", showProgress=FALSE)
 saveRDS(DT, file = "merge.rds", compress = FALSE)
 
 
-# defining the time function
+# define the time function
 time <- function(x){sum(system.time(x)[1:2])}
 
 # defining the benchmark function
@@ -28,10 +28,10 @@ benchmark <- function(file){
 	out <- NULL
 	csvfile <- paste0(file, ".csv")
 	rdsfile <- paste0(file, ".rds")
+
 	# write and read
 	out[length(out)+1] <- time(DT <- fread(csvfile, showProgress=FALSE))
 	out[length(out)+1] <- time(saveRDS(DT, file = rdsfile, compress = FALSE))
-	rm(list = setdiff(ls(),"out")) 
 	out[length(out)+1] <- time(DT <- readRDS(rdsfile))
 
 	# sort and duplicates  
@@ -39,7 +39,10 @@ benchmark <- function(file){
 	out[length(out)+1] <- time(setkeyv(DT, c("id6")))
 	out[length(out)+1] <- time(setkeyv(DT, c("v3")))
 	out[length(out)+1] <- time(setkeyv(DT, c("id1","id2","id3", "id4", "id5", "id6")))
-	out[length(out)+1] <- time(sum(!duplicated(DT, by = c("id3"))))
+	out[length(out)+1] <- time(uniqueN(DT, by = c("id3")))
+	out[length(out)+1] <- time(uniqueN(DT, by = c("id1", "id2", "id3")))
+	out[length(out)+1] <- time(unique(DT, by = c("id2", "id3")))
+
 
 	# merge 
 	DT <- readRDS(rdsfile) 
@@ -56,7 +59,7 @@ benchmark <- function(file){
 	out[length(out)+1] <- time(rbindlist(list(DT,DT1), fill = TRUE))
 
 	# reshape
-	rm(list = setdiff(ls(),"out"))
+	rm(list = setdiff(ls(), c("out", "rdsfile")))
 	DT <- readRDS(rdsfile) 
 	DT1 <- unique(DT, by = c("id1", "id2", "id3"))
 	DT1 <- DT1[1:(nrow(DT1)/10)]
@@ -81,7 +84,7 @@ benchmark <- function(file){
 	DT[, temp := NULL] 
 	
 	# split apply combine
-	rm(list = setdiff(ls(),"out"))
+	rm(list = setdiff(ls(), c("out", "rdsfile")))
 	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = id3])
 	DT[, temp := NULL] 
 	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id3", "id2", "id1")])
@@ -92,11 +95,13 @@ benchmark <- function(file){
 	DT[, temp := NULL] 
 	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id1", "id2", "id3", "id4", "id5", "id6")])
 	DT[, temp := NULL]
-	DT1 <- DT[1:(nrow(DT)/2)]
-	out[length(out)+1] <- time(DT1[, temp := sd(v3, na.rm = TRUE), by = id3])
+	out[length(out)+1] <- time(DT[, temp := sd(v3, na.rm = TRUE), by = id3])
 	DT[, temp := NULL] 
+	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE), mv1 = quantile(v1, 0.5, na.rm = TRUE),  mv2 = quantile(v2, 0.5, na.rm = TRUE)) , by = c("id1", "id2")])
+
 
 	# regress
+	DT1 <- DT[1:(nrow(DT)/2)]
 	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6, DT1))
 	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1), DT1))
 	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1) | id1 | 0 | id1, DT1))

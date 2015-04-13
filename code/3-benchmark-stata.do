@@ -86,6 +86,23 @@ program define benchmark, rclass
 	local i = `i' + 1
 	return scalar cmd`i' = r(t1)
 
+
+	timer clear
+	timer on 1
+	distinct id1 id2 id3, joint
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+
+	timer clear
+	timer on 1
+	duplicates drop id2 id3, force
+	timer off 1	
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+
 	/* merge */
 	use `0'.dta, clear
 	timer clear
@@ -207,7 +224,15 @@ program define benchmark, rclass
 	drop temp
 
 
-	keep if _n < _N/2
+	timer clear
+	timer on 1
+	collapse (mean) v1 v2 (sum) v3 (p50) mv1 = v1 mv2 = v2,  by(id1 id2) fast
+	timer off 1
+	timer list
+	local i = `i' + 1
+	return scalar cmd`i' = r(t1)
+	drop temp
+
 
 	timer clear
 	timer on 1
@@ -220,6 +245,7 @@ program define benchmark, rclass
 
 
 	/* regress */
+	keep if _n < _N/2
 	timer clear
 	timer on 1
 	reg v3 v2 id4 id5 id6
