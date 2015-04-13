@@ -16,8 +16,8 @@ library(lfe)
 options(mc.cores=4)
 
 # creating the file to merge with
-DT <- fread("merge.csv", showProgress=FALSE)
-saveRDS(DT, file = "merge.rds", compress = FALSE)
+DTmerge <- fread("merge.csv", showProgress=FALSE)
+saveRDS(DTmerge, file = "merge.rds", compress = FALSE)
 
 
 # define the time function
@@ -59,7 +59,6 @@ benchmark <- function(file){
 	out[length(out)+1] <- time(rbindlist(list(DT,DT1), fill = TRUE))
 
 	# reshape
-	rm(list = setdiff(ls(), c("out", "rdsfile")))
 	DT <- readRDS(rdsfile) 
 	DT1 <- unique(DT, by = c("id1", "id2", "id3"))
 	DT1 <- DT1[1:(nrow(DT1)/10)]
@@ -84,7 +83,6 @@ benchmark <- function(file){
 	DT[, temp := NULL] 
 	
 	# split apply combine
-	rm(list = setdiff(ls(), c("out", "rdsfile")))
 	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = id3])
 	DT[, temp := NULL] 
 	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id3", "id2", "id1")])
