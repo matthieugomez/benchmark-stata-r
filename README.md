@@ -1,7 +1,7 @@
 # Benchmarks
 
 ## Results
-This page compares speed of R and Stata for typical data analysis on randomly generated datasets (see below) of 50 Mo, 500 Mo, and 5 Go. The graph below shows the results for the 500MB dataset (with 1e7 observations).
+This page compares the speed of R and Stata for typical data analysis on randomly generated datasets (see below) of 50 Mo, 500 Mo, and 5 Go. The graph below shows the results for the 500MB dataset (with 1e7 observations).
 
 <img class = "img-responsive"  src="/output/1e7.png" />
 
