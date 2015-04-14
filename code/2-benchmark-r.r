@@ -79,23 +79,29 @@ benchmark <- function(file){
 	# functions
 	out[length(out)+1] <- time(DT[, temp := bin(v3, 10)])
 	DT[, temp := NULL] 
-	out[length(out)+1] <- time(DT[, temp := .GRP, by = id3])
+	out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id1", "id2", "id3")])
 	DT[, temp := NULL] 
 	
-	# split apply combine
+	# mean of large groups
+	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = id1])
+	DT[, temp := NULL] 
+	# mean of smaller groups
 	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = id3])
 	DT[, temp := NULL] 
-	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id3", "id2", "id1")])
-	DT[, temp := NULL] 
+	# groups defined by int
 	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = id6])
 	DT[, temp := NULL] 
-	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id6", "id5", "id4")])
+	# groups defined by multiple string
+	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id1", "id2", "id3")])
 	DT[, temp := NULL] 
-	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id1", "id2", "id3", "id4", "id5", "id6")])
-	DT[, temp := NULL]
 	out[length(out)+1] <- time(DT[, temp := sd(v3, na.rm = TRUE), by = id3])
 	DT[, temp := NULL] 
-	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE), mv1 = quantile(v1, 0.5, na.rm = TRUE),  mv2 = quantile(v2, 0.5, na.rm = TRUE)) , by = c("id1", "id2")])
+
+	# collapse large groups
+	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id1")])
+
+	# collapse small groups
+	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id1", "id2", "id3")])
 
 
 	# regress
@@ -113,4 +119,30 @@ benchmark <- function(file){
 benchmark("2e6")
 benchmark("1e7")
 benchmark("1e8")
+
+
+sysuse nlsw88.dta, clear
+local script ""
+local label ""
+egen temp = xtile(tenure), by(race) n(10)
+collapse (mean) wage tenure, by(temp race)
+colorbrewer 12, palette(Set2)
+forvalues i = 1/12{
+local script `script' (scatter wage tenure if industry == `i', mcolor("`=r(color`i')'")   msize(1) legend(label(`i' `"`: label (industry) `i''"')))
+}
+twoway `script'
+
+
+
+
+sysuse nlsw88.dta, clear
+local script ""
+local label ""
+egen temp = xtile(tenure), by(industry) n(10)
+collapse (mean) wage tenure, by(temp industry)
+colorwheel 12
+forvalues i = 1/12{
+local script `script' (scatter wage tenure if industry == `i', mcolor("`=r(color`i')'")   msize(1) legend(label(`i' `"`: label (industry) `i''"')))
+}
+twoway `script'
 

@@ -154,7 +154,7 @@ program define benchmark, rclass
 
 	timer clear
 	timer on 1
-	egen temp = group(id3)
+	egen temp = group(id1 id2 id3)
 	timer off 1
 	timer list
 	return scalar cmd`++i' = r(t1)
@@ -163,7 +163,7 @@ program define benchmark, rclass
 	/* split apply combine */ 
 	timer clear
 	timer on 1
-	egen temp = sum(v3), by(id3)
+	egen temp = sum(v3), by(id1)
 	timer off 1
 	timer list
 	return scalar cmd`++i' = r(t1)
@@ -171,7 +171,7 @@ program define benchmark, rclass
 
 	timer clear
 	timer on 1
-	egen temp = sum(v3), by(id3 id2 id1)
+	egen temp = sum(v3), by(id3)
 	timer off 1
 	timer list
 	return scalar cmd`++i' = r(t1)
@@ -187,15 +187,7 @@ program define benchmark, rclass
 
 	timer clear
 	timer on 1
-	egen temp = mean(v3),by(id6 id5 id4)
-	timer off 1
-	timer list
-	return scalar cmd`++i' = r(t1)
-	drop temp
-
-	timer clear
-	timer on 1
-	egen temp = mean(v3), by(id1 id2 id3 id4 id5 id6)	
+	egen temp = mean(v3),by(id1 id2 id3)
 	timer off 1
 	timer list
 	return scalar cmd`++i' = r(t1)
@@ -211,11 +203,18 @@ program define benchmark, rclass
 
 	timer clear
 	timer on 1
-	collapse (mean) v1 v2 (sum) v3 (p50) mv1 = v1 mv2 = v2,  by(id1 id2) fast
+	collapse (mean) v1 v2 (sum) v3,  by(id1) fast
 	timer off 1
 	timer list
 	return scalar cmd`++i' = r(t1)
 
+	use `0'.dta, clear
+	timer clear
+	timer on 1
+	collapse (mean) v1 v2 (sum) v3,  by(id1 id2 id3) fast
+	timer off 1
+	timer list
+	return scalar cmd`++i' = r(t1)
 
 	/* regress */
 	use `0'.dta, clear
