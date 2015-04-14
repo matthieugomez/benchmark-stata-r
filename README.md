@@ -67,7 +67,7 @@ This script creates four files required in the R and Stata scripts: "2e6.csv", "
 I runned the R script in the file [2-benchmark-r.r](code/2-benchmark-r.r):
 
 ```R
-# To run the script, you first need to ownload the relevant packages:
+# To run the script, download the relevant packages:
 # install.packages("data.table")
 # install.packages("tidyr")
 # install.packages("statar")
@@ -196,7 +196,7 @@ I runned the Stata script in the file [3-benchmark-stata.do](code/3-benchmark-st
 
 ```
 /***************************************************************************************************
-To run the script, you first need to download the relevant packages:
+To run the script, download the relevant packages:
 ssc install distinct
 ssc install reghdfe
 ssc install fastxtile

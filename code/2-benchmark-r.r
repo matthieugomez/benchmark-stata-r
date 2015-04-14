@@ -1,4 +1,4 @@
-# To run the script, you first need to ownload the relevant packages:
+# To run the script, download the relevant packages:
 # install.packages("data.table")
 # install.packages("tidyr")
 # install.packages("statar")

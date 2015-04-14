@@ -1,5 +1,5 @@
 /***************************************************************************************************
-To run the script, you first need to download the relevant packages:
+To run the script, download the relevant packages:
 ssc install distinct
 ssc install reghdfe
 ssc install fastxtile
