@@ -167,10 +167,10 @@ benchmark <- function(file){
 	DT[, temp := NULL] 
 
 	# collapse large groups
-	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id1")])
+	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = id1])
 
 	# collapse small groups
-	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id1", "id2", "id3")])
+	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = id3])
 
 
 	# regress
@@ -406,7 +406,7 @@ program define benchmark, rclass
 	use `0'.dta, clear
 	timer clear
 	timer on 1
-	collapse (mean) v1 v2 (sum) v3,  by(id1 id2 id3) fast
+	collapse (mean) v1 v2 (sum) v3,  by(id3) fast
 	timer off 1
 	timer list
 	return scalar cmd`++i' = r(t1)
