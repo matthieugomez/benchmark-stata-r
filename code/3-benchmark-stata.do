@@ -1,10 +1,8 @@
 /***************************************************************************************************
-The command distinct can be downloaded here: https://ideas.repec.org/c/boc/bocode/s424201.html
-
-The command regh2dfe can be dowloaded here: https://ideas.repec.org/c/boc/bocode/s457101.html
-
-The command fastxtile can be dowloaded here: https://ideas.repec.org/c/boc/bocode/s457710.html
-
+To run the script, you first need to download the relevant packages:
+ssc install distinct
+ssc install reghdfe
+ssc install fastxtile
 ***************************************************************************************************/
 /* set options */
 drop _all

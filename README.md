@@ -85,11 +85,11 @@ library(lfe)
 options(mc.cores=4)
 
 # creating the file to merge with
-DT <- fread("merge.csv", showProgress=FALSE)
-saveRDS(DT, file = "merge.rds", compress = FALSE)
+DTmerge <- fread("merge.csv", showProgress=FALSE)
+saveRDS(DTmerge, file = "merge.rds", compress = FALSE)
 
 
-# defining the time function
+# define the time function
 time <- function(x){sum(system.time(x)[1:2])}
 
 # defining the benchmark function
@@ -97,10 +97,10 @@ benchmark <- function(file){
 	out <- NULL
 	csvfile <- paste0(file, ".csv")
 	rdsfile <- paste0(file, ".rds")
+
 	# write and read
 	out[length(out)+1] <- time(DT <- fread(csvfile, showProgress=FALSE))
 	out[length(out)+1] <- time(saveRDS(DT, file = rdsfile, compress = FALSE))
-	rm(list = setdiff(ls(),"out")) 
 	out[length(out)+1] <- time(DT <- readRDS(rdsfile))
 
 	# sort and duplicates  
@@ -108,7 +108,10 @@ benchmark <- function(file){
 	out[length(out)+1] <- time(setkeyv(DT, c("id6")))
 	out[length(out)+1] <- time(setkeyv(DT, c("v3")))
 	out[length(out)+1] <- time(setkeyv(DT, c("id1","id2","id3", "id4", "id5", "id6")))
-	out[length(out)+1] <- time(sum(!duplicated(DT, by = c("id3"))))
+	out[length(out)+1] <- time(uniqueN(DT, by = c("id3")))
+	out[length(out)+1] <- time(uniqueN(DT, by = c("id1", "id2", "id3")))
+	out[length(out)+1] <- time(unique(DT, by = c("id2", "id3")))
+
 
 	# merge 
 	DT <- readRDS(rdsfile) 
@@ -125,7 +128,6 @@ benchmark <- function(file){
 	out[length(out)+1] <- time(rbindlist(list(DT,DT1), fill = TRUE))
 
 	# reshape
-	rm(list = setdiff(ls(),"out"))
 	DT <- readRDS(rdsfile) 
 	DT1 <- unique(DT, by = c("id1", "id2", "id3"))
 	DT1 <- DT1[1:(nrow(DT1)/10)]
@@ -146,26 +148,33 @@ benchmark <- function(file){
 	# functions
 	out[length(out)+1] <- time(DT[, temp := bin(v3, 10)])
 	DT[, temp := NULL] 
-	out[length(out)+1] <- time(DT[, temp := .GRP, by = id3])
+	out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id1", "id2", "id3")])
 	DT[, temp := NULL] 
 	
-	# split apply combine
-	rm(list = setdiff(ls(),"out"))
+	# mean of large groups
+	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = id1])
+	DT[, temp := NULL] 
+	# mean of smaller groups
 	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = id3])
 	DT[, temp := NULL] 
-	out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id3", "id2", "id1")])
-	DT[, temp := NULL] 
+	# groups defined by int
 	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = id6])
 	DT[, temp := NULL] 
-	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id6", "id5", "id4")])
+	# groups defined by multiple string
+	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id1", "id2", "id3")])
 	DT[, temp := NULL] 
-	out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id1", "id2", "id3", "id4", "id5", "id6")])
-	DT[, temp := NULL]
-	DT1 <- DT[1:(nrow(DT)/10)]
-	out[length(out)+1] <- time(DT1[, temp := sd(v3, na.rm = TRUE), by = id3])
+	out[length(out)+1] <- time(DT[, temp := sd(v3, na.rm = TRUE), by = id3])
 	DT[, temp := NULL] 
 
+	# collapse large groups
+	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id1")])
+
+	# collapse small groups
+	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id1", "id2", "id3")])
+
+
 	# regress
+	DT1 <- DT[1:(nrow(DT)/2)]
 	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6, DT1))
 	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1), DT1))
 	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1) | id1 | 0 | id1, DT1))
@@ -187,12 +196,10 @@ I runned the Stata script in the file [3-benchmark-stata.do](code/3-benchmark-st
 
 ```
 /***************************************************************************************************
-The command distinct can be downloaded here: https://ideas.repec.org/c/boc/bocode/s424201.html
-
-The command regh2dfe can be dowloaded here: https://ideas.repec.org/c/boc/bocode/s457101.html
-
-The command fastxtile can be dowloaded here: https://ideas.repec.org/c/boc/bocode/s457710.html
-
+To run the script, you first need to download the relevant packages:
+ssc install distinct
+ssc install reghdfe
+ssc install fastxtile
 ***************************************************************************************************/
 /* set options */
 drop _all
@@ -214,24 +221,21 @@ program define benchmark, rclass
 	import delimited using `0'.csv, clear
 	timer off 1	
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	timer clear
 	timer on 1
 	save `0'.dta, replace
 	timer off 1	
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	timer clear
 	timer on 1
 	use `0'.dta, clear
 	timer off 1	
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	/* sort  */
 	timer clear
@@ -239,40 +243,50 @@ program define benchmark, rclass
 	sort id3 
 	timer off 1	
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	timer clear
 	timer on 1
 	sort id6
 	timer off 1	
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	timer clear
 	timer on 1
 	sort v3
 	timer off 1	
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	timer clear
 	timer on 1
 	sort id1 id2 id3 id4 id5 id6
 	timer off 1	
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	timer clear
 	timer on 1
 	distinct id3
 	timer off 1	
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
+
+
+	timer clear
+	timer on 1
+	distinct id1 id2 id3, joint
+	timer off 1	
+	timer list
+	return scalar cmd`++i' = r(t1)
+
+	timer clear
+	timer on 1
+	duplicates drop id2 id3, force
+	timer off 1	
+	timer list
+	return scalar cmd`++i' = r(t1)
 
 	/* merge */
 	use `0'.dta, clear
@@ -281,8 +295,7 @@ program define benchmark, rclass
 	merge m:1 id1 id3 using merge, keep(master matched) nogen
 	timer off 1	
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	
 	/* append */
 	use `0'.dta, clear
@@ -291,12 +304,11 @@ program define benchmark, rclass
 	append using `0'.dta
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	/* reshape */
 	bys id1 id2 id3: keep if _n == 1
-	keep if _n<_N/10
+	keep if _n < _N/10
 	foreach v of varlist id4 id5 id6 v1 v2 v3{
 		rename `v' v_`v'
 	}
@@ -305,15 +317,13 @@ program define benchmark, rclass
 	reshape long v_, i(id1 id2 id3) j(variable) string
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	timer clear
 	timer on 1
 	reshape wide v_, i(id1 id2 id3) j(variable) string
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	/* recode */
 	use `0'.dta, clear
@@ -325,8 +335,7 @@ program define benchmark, rclass
 	replace v1_name = "third" if inlist(v1, 4, 5)
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	drop v1_name
 
 	/* functions */
@@ -335,36 +344,32 @@ program define benchmark, rclass
 	fastxtile temp = v3, n(10)
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	drop temp
 
 	timer clear
 	timer on 1
-	egen temp = group(id3)
+	egen temp = group(id1 id2 id3)
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	drop temp
 	
 	/* split apply combine */ 
 	timer clear
 	timer on 1
-	egen temp = sum(v3), by(id3)
+	egen temp = sum(v3), by(id1)
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	drop temp
 
 	timer clear
 	timer on 1
-	egen temp = sum(v3), by(id3 id2 id1)
+	egen temp = sum(v3), by(id3)
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	drop temp
 
 	timer clear
@@ -372,65 +377,63 @@ program define benchmark, rclass
 	egen temp = mean(v3), by(id6)
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	drop temp
 
 	timer clear
 	timer on 1
-	egen temp = mean(v3),by(id6 id5 id4)
+	egen temp = mean(v3),by(id1 id2 id3)
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	drop temp
-
-	timer clear
-	timer on 1
-	egen temp = mean(v3), by(id1 id2 id3 id4 id5 id6)	
-	timer off 1
-	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
-	drop temp
-
-
-	keep if _n < _N/10
 
 	timer clear
 	timer on 1
 	egen temp = sd(v3), by(id3)
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	drop temp
 
+	timer clear
+	timer on 1
+	collapse (mean) v1 v2 (sum) v3,  by(id1) fast
+	timer off 1
+	timer list
+	return scalar cmd`++i' = r(t1)
+
+	use `0'.dta, clear
+	timer clear
+	timer on 1
+	collapse (mean) v1 v2 (sum) v3,  by(id1 id2 id3) fast
+	timer off 1
+	timer list
+	return scalar cmd`++i' = r(t1)
 
 	/* regress */
+	use `0'.dta, clear
+	keep if _n <= _N/2
 	timer clear
 	timer on 1
 	reg v3 v2 id4 id5 id6
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	timer clear
 	timer on 1
 	reg v3 v2 id4 id5 id6 i.v1
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	timer clear
 	timer on 1
 	areg v3 v2 id4 id5 id6 i.v1, a(id1) cl(id1)
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 
 	egen g1=group(id1)
 	egen g2=group(id2)
@@ -439,8 +442,7 @@ program define benchmark, rclass
 	reghdfe v3 v2 id4 id5 id6, absorb(g1 g2) vce(cluster g1)  tolerance(1e-6) fast
 	timer off 1
 	timer list
-	local i = `i' + 1
-	return scalar cmd`i' = r(t1)
+	return scalar cmd`++i' = r(t1)
 	}
 end
 
