@@ -1,7 +1,7 @@
 # Benchmarks
 
 ## Results
-This page compares the speed of R and Stata for typical data analysis on randomly generated datasets (see below) of 50 Mo, 500 Mo, and 5 Go. The graph below shows the results for the 500MB dataset (with 1e7 observations).
+This page compares the speed of R and Stata for typical data analysis on randomly generated datasets (see below) of 50 Mo, 500 Mo, and 5 Go. The graph below shows the results for the 500MB dataset (corresponding to 1e7 observations).
 
 <img class = "img-responsive"  src="/output/1e7.png" />
 
@@ -465,8 +465,7 @@ return list, all
 
 The machine used for this benchmark has a 2.9GHz i5 processor (4 cores),
 
-The version of Stata used is Stata 13 MP 4 cores. 
-The R session info is 
+The Stata version is Stata 13 MP.  The R session info is 
 
 ````R
 R version 3.1.1 (2014-07-10)
