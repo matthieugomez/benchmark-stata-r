@@ -101,7 +101,7 @@ benchmark <- function(file){
 	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id1")])
 
 	# collapse small groups
-	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id1", "id2", "id3")])
+	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id3")])
 
 
 	# regress
@@ -119,30 +119,4 @@ benchmark <- function(file){
 benchmark("2e6")
 benchmark("1e7")
 benchmark("1e8")
-
-
-sysuse nlsw88.dta, clear
-local script ""
-local label ""
-egen temp = xtile(tenure), by(race) n(10)
-collapse (mean) wage tenure, by(temp race)
-colorbrewer 12, palette(Set2)
-forvalues i = 1/12{
-local script `script' (scatter wage tenure if industry == `i', mcolor("`=r(color`i')'")   msize(1) legend(label(`i' `"`: label (industry) `i''"')))
-}
-twoway `script'
-
-
-
-
-sysuse nlsw88.dta, clear
-local script ""
-local label ""
-egen temp = xtile(tenure), by(industry) n(10)
-collapse (mean) wage tenure, by(temp industry)
-colorwheel 12
-forvalues i = 1/12{
-local script `script' (scatter wage tenure if industry == `i', mcolor("`=r(color`i')'")   msize(1) legend(label(`i' `"`: label (industry) `i''"')))
-}
-twoway `script'
 

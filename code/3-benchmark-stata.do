@@ -209,7 +209,7 @@ program define benchmark, rclass
 	use `0'.dta, clear
 	timer clear
 	timer on 1
-	collapse (mean) v1 v2 (sum) v3,  by(id1 id2 id3) fast
+	collapse (mean) v1 v2 (sum) v3,  by(id3) fast
 	timer off 1
 	timer list
 	return scalar cmd`++i' = r(t1)
