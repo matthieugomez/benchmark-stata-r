@@ -480,3 +480,11 @@ attached base packages:
 other attached packages:
  [1] statar_0.1.3    lfe_1.7-1404     Matrix_1.1-4    tidyr_0.1.0.9000 data.table_1.9.5 
 ````
+
+## All results
+#### 2e6 observations (50Mo)
+<img class = "img-responsive"  src="/output/2e6.png" />
+#### 1e7 observations (500Mo)
+<img class = "img-responsive"  src="/output/1e7.png" />
+#### 1e8 observations (5Go)
+<img class = "img-responsive"  src="/output/1e8.png" />
