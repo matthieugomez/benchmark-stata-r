@@ -7,22 +7,22 @@ This page compares the speed of R and Stata for typical data analysis on randoml
 
 
 ### loading data
-R is faster than Stata to read `.csv`: the data.table command `fread` is ten times faster than the Stata commands `insheet`. However, when reading or saving data in proprietary format (`.dta` for Stata and `.rds` for R), Stata is more than ten times faster.
+R is faster than ten times faster than Stata to read `.csv` (using the data.table command `fread` vs the Stata commands `insheet`. However, when reading or saving data in proprietary format (`.dta` for Stata and `.rds` for R), Stata is more than ten times faster.
 
 ### manipulating data
 The package `data.table` is 10x faster than Stata for the principal commands of data cleaning: sorting, applying functions within groups, reshaping, joining multiple datasets.
 
 ### estimating models 
-R is much slower than Stata to estimate linear models (even when I used specialized packages such as `biglm` or `speedlm`). I don't really understand why - one reason may be that Stata `reg` is multi threaded. Another reason may be that variables need to be converted to matrix first in R.
+R is much slower than Stata to estimate linear models (even using specialized packages such as `biglm` or `speedlm`). I don't really understand why - one reason may be that Stata `reg` is multi threaded. Another reason may be that variables need to be converted to matrix first in R.
 
-For models with high dimensional fixed effect(s), `felm` is faster than the corresponding Stata commands (`areg/reghdfe)`. One reason is that `felm` embeds an algorithm to speed up within transformations of multiple factors as described [here](http://journal.r-project.org/archive/2013-2/gaure.pdf).
+That being said, for models with high dimensional fixed effect(s), `felm` is faster than the corresponding Stata commands (`areg/reghdfe)`.
 
 ### conclusion
 In conclusion, R is an order of magnitude faster than Stata for common data analysis, and the difference grows with the dataset size.
 
 
 The dataset and the code I used to produce these graphs are available below. 
-If you are a Stata user and you want to know more about R, you may be interested in other things I wrote: an [online guide to R](http://www.princeton.edu/~mattg/statar/) and the [statar package](http://cran.r-project.org/package=statar).
+
 
 ## Code
 
