@@ -18,7 +18,7 @@ R is much slower than Stata to estimate linear models (even using specialized pa
 That being said, for models with high dimensional fixed effect(s), `felm` is faster than the corresponding Stata commands (`areg/reghdfe)`.
 
 ### conclusion
-In conclusion, R is an order of magnitude faster than Stata for common data analysis, and the difference grows with the dataset size.
+In conclusion, R is an order of magnitude faster than Stata for common data analysis, and the difference grows with the dataset size. The difference reflects the fact that certain R packages use more efficient C++ algorithms than the ones used in Stata 13.
 
 
 The dataset and the code I used to produce these graphs are available below. 
