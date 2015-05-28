@@ -104,6 +104,23 @@ benchmark <- function(file){
 	out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id3")])
 
 
+
+	# loop over rows
+	extract <- function(v){
+		for (obs in 1:(length(v))){
+		a <- v[obs] 
+		}
+	}
+	out[length(out)+1] <- time(extract(DT[, list(id)]))
+
+	generate <- function(n){
+		for (obs in 1:n){
+			v <- 1
+		}
+	}
+	out[length(out)+1] <- time(DT[, v:= generate(nrow(DT))])
+
+
 	# regress
 	DT1 <- DT[1:(nrow(DT)/2)]
 	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6, DT1))
@@ -112,6 +129,9 @@ benchmark <- function(file){
 	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6  | id1 + id2 | 0 | id1, DT1))
 	# return time vector
 	out
+
+
+
 }
 
 
@@ -119,4 +139,8 @@ benchmark <- function(file){
 benchmark("2e6")
 benchmark("1e7")
 benchmark("1e8")
+
+
+
+
 
