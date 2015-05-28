@@ -106,31 +106,38 @@ benchmark <- function(file){
 
 
 	# loop over rows
-	extract <- function(v){
+	loop_sum <- function(v){
+		a <- 0
 		for (obs in 1:(length(v))){
-		a <- v[obs] 
+			a <- a + v[obs] 
 		}
+		a
 	}
-	out[length(out)+1] <- time(extract(DT[, list(id)]))
+	out[length(out)+1] <- time(loop_sum(DT[["id4"]]))
 
-	generate <- function(n){
+	loop_generate <- function(n){
+		v = rep(0, n)
 		for (obs in 1:n){
-			v <- 1
+			v[obs] <- 1
 		}
+		v
 	}
-	out[length(out)+1] <- time(DT[, v:= generate(nrow(DT))])
+	out[length(out)+1] <- time(DT[, temp := loop_generate(nrow(DT))])
 
+	setDF(DT)
+	out[length(out)+1] <- time(crossprod(as.matrix(select(DT, id4, id5, id6))))
+	setDT(DT)
 
 	# regress
-	DT1 <- DT[1:(nrow(DT)/2)]
-	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6, DT1))
-	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1), DT1))
-	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1) | id1 | 0 | id1, DT1))
-	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6  | id1 + id2 | 0 | id1, DT1))
+	DT <- DT[1:(nrow(DT)/2)]
+	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6, DT))
+	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1), DT))
+	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1) | id1 | 0 | id1, DT))
+	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6  | id1 + id2 | 0 | id1, DT))
+
+
 	# return time vector
 	out
-
-
 
 }
 

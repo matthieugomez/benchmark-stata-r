@@ -16,17 +16,19 @@ save merge.dta, replace
 mata
 ***************************************************************************************************/
 mata: 
-	void loop_row_extract(string scalar y, real scalar first, real scalar last){
+	void loop_sum(string scalar y, real scalar first, real scalar last){
 		real scalar index
 		real scalar a
 		index =  st_varindex(y)
+		a = 0
 		for (obs = first ; obs <= last ; obs++){
-			a = _st_data(obs, index) 
+			a = a + _st_data(obs, index) 
 		}
 	}
 
+
 mata:
-	void loop_row_create(string scalar newvar, real scalar first, real scalar last){
+	void loop_generate(string scalar newvar, real scalar first, real scalar last){
 		real scalar index
 		index = st_addvar("float", newvar)
 		for (obs = first ; obs <= last ; obs++){
@@ -36,6 +38,12 @@ mata:
 
 end
 
+mata:
+	void m_invert(string scalar vars){
+		st_view(V, ., vars)
+		cross(V, V)
+	}
+end
 /***************************************************************************************************
 
 ***************************************************************************************************/
@@ -244,18 +252,22 @@ program define benchmark, rclass
 		use `0'.dta, clear
 		timer clear
 		timer on 1
-		mata: loop_row_extract("id1", 1, `=_N')
+		mata: loop_sum("id4", 1, `=_N')
 		timer off 1
 		return scalar cmd`++i' = r(t1)
 
 	
 		timer clear
 		timer on 1
-		mata: loop_row_create("temp", 1, `=_N')
+		mata: loop_generate("temp", 1, `=_N')
 		timer off 1
 		return scalar cmd`++i' = r(t1)
 
-
+		timer clear
+		timer on 1
+		mata: m_invert("id4 id5 id6")
+		timer off 1
+		return scalar cmd`++i' = r(t1)
 
 		/* regress */
 		use `0'.dta, clear
