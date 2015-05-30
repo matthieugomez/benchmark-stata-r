@@ -9,7 +9,6 @@
 library(data.table)
 library(tidyr)
 library(statar)
-library(biglm)
 library(lfe)
 
 # setting options
@@ -105,7 +104,16 @@ benchmark <- function(file){
 
 
 
-	# loop over rows
+	
+	# regress
+	DT1 <- DT[1:(nrow(DT)/2)]
+	out[length(out)+1] <- time(felm(v3 ~ v1 + v2 + id4 + id5, DT1))
+	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + as.factor(v1), DT1))
+	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5  + as.factor(v1) | id6 | 0 | id6, DT1))
+	out[length(out)+1] <- time(felm(v3 ~  v2 + id4 + id5  + as.factor(v1) | id6 + id3 | 0 | id6, DT1))
+
+
+	# Vector / matrix functions
 	loop_sum <- function(v){
 		a <- 0
 		for (obs in 1:(length(v))){
@@ -125,15 +133,8 @@ benchmark <- function(file){
 	out[length(out)+1] <- time(DT[, temp := loop_generate(nrow(DT))])
 
 	setDF(DT)
-	out[length(out)+1] <- time(crossprod(as.matrix(select(DT, id4, id5, id6))))
+	out[length(out)+1] <- time(crossprod(as.matrix(select(DT, v2, id4, id5, id6))))
 	setDT(DT)
-
-	# regress
-	DT <- DT[1:(nrow(DT)/2)]
-	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6, DT))
-	out[length(out)+1] <- time(biglm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1), DT))
-	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6 + as.factor(v1) | id1 | 0 | id1, DT))
-	out[length(out)+1] <- time(felm(v3 ~ v2 + id4 + id5 + id6  | id1 + id2 | 0 | id1, DT))
 
 
 	# return time vector

@@ -51,25 +51,26 @@ end
 cap program drop benchmark
 program define benchmark, rclass
 	quietly{
+		local 0 file
 		local i = 0
 		/* write and read */
 		timer clear
 		timer on 1
-		import delimited using `0'.csv, clear
+		import delimited using `file'.csv, clear
 		timer off 1	
 		timer list
 		return scalar cmd`++i' = r(t1)
 
 		timer clear
 		timer on 1
-		save `0'.dta, replace
+		save `file'.dta, replace
 		timer off 1	
 		timer list
 		return scalar cmd`++i' = r(t1)
 
 		timer clear
 		timer on 1
-		use `0'.dta, clear
+		use `file'.dta, clear
 		timer off 1	
 		timer list
 		return scalar cmd`++i' = r(t1)
@@ -126,7 +127,7 @@ program define benchmark, rclass
 		return scalar cmd`++i' = r(t1)
 
 		/* merge */
-		use `0'.dta, clear
+		use `file'.dta, clear
 		timer clear
 		timer on 1
 		merge m:1 id1 id3 using merge, keep(master matched) nogen
@@ -135,10 +136,10 @@ program define benchmark, rclass
 		return scalar cmd`++i' = r(t1)
 
 		/* append */
-		use `0'.dta, clear
+		use `file'.dta, clear
 		timer clear
 		timer on 1
-		append using `0'.dta
+		append using `file'.dta
 		timer off 1
 		timer list
 		return scalar cmd`++i' = r(t1)
@@ -163,7 +164,7 @@ program define benchmark, rclass
 		return scalar cmd`++i' = r(t1)
 
 		/* recode */
-		use `0'.dta, clear
+		use `file'.dta, clear
 		timer clear
 		timer on 1
 		gen v1_name = ""
@@ -240,7 +241,7 @@ program define benchmark, rclass
 		timer list
 		return scalar cmd`++i' = r(t1)
 
-		use `0'.dta, clear
+		use `file'.dta, clear
 		timer clear
 		timer on 1
 		collapse (mean) v1 v2 (sum) v3,  by(id3) fast
@@ -248,61 +249,63 @@ program define benchmark, rclass
 		timer list
 		return scalar cmd`++i' = r(t1)
 
-		/* loops over rows */
-		use `0'.dta, clear
+
+		/* regress */
+		use `file'.dta, clear
+		keep if _n <= _N/2
+		timer clear
+		timer on 1
+		reg v3 v1 v2 id4 id5
+		timer off 1
+		timer list
+		return scalar cmd`++i' = r(t1)
+
+		timer clear
+		timer on 1
+		reg v3 i.v1 v2 id4 id5
+		timer off 1
+		timer list
+		return scalar cmd`++i' = r(t1)
+
+		timer clear
+		timer on 1
+		areg v3 v2 id4 id5 i.v1, a(id6) cl(id6)
+		timer off 1
+		timer list
+		return scalar cmd`++i' = r(t1)
+
+
+		egen g = group(id3)
+		timer clear
+		timer on 1
+		cap reghdfe v3 v2 id4 id5 i.v1, absorb(id6 g) vce(cluster id6)  tolerance(1e-6) fast
+		timer off 1
+		timer list
+		return scalar cmd`++i' = r(t1)
+
+
+		/* vector / matrix functions */
+		use `file'.dta, clear
 		timer clear
 		timer on 1
 		mata: loop_sum("id4", 1, `=_N')
 		timer off 1
+		timer list
 		return scalar cmd`++i' = r(t1)
 
-	
 		timer clear
 		timer on 1
 		mata: loop_generate("temp", 1, `=_N')
 		timer off 1
-		return scalar cmd`++i' = r(t1)
-
-		timer clear
-		timer on 1
-		mata: m_invert("id4 id5 id6")
-		timer off 1
-		return scalar cmd`++i' = r(t1)
-
-		/* regress */
-		use `0'.dta, clear
-		keep if _n <= _N/2
-		timer clear
-		timer on 1
-		reg v3 v2 id4 id5 id6
-		timer off 1
 		timer list
 		return scalar cmd`++i' = r(t1)
 
 		timer clear
 		timer on 1
-		reg v3 v2 id4 id5 id6 i.v1
+		mata: m_invert("v2 id4 id5 id6")
 		timer off 1
 		timer list
 		return scalar cmd`++i' = r(t1)
-
-		timer clear
-		timer on 1
-		areg v3 v2 id4 id5 id6 i.v1, a(id1) cl(id1)
-		timer off 1
-		timer list
-		return scalar cmd`++i' = r(t1)
-
-		egen g1=group(id1)
-		egen g2=group(id2)
-		timer clear
-		timer on 1
-		reghdfe v3 v2 id4 id5 id6, absorb(g1 g2) vce(cluster g1)  tolerance(1e-6) fast
-		timer off 1
-		timer list
-		return scalar cmd`++i' = r(t1)
-
-
 
 
 	}
