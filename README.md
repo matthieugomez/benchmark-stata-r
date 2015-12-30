@@ -1,10 +1,11 @@
 # Benchmarks
 
 ## Results
-This page compares the speed of R and Stata for typical data analysis. Instructions are runned on randomly generated datasets of 50 Mo, 500 Mo, and 5 Go.   For each data operation, I use the fatest command available in each language (to the best of my knowledge). For instance, I use `fastxtile` instead of `xtile` in Stata. Similarly, I use the package `data.table` in R. The graph below shows the results for the 500MB dataset (corresponding to 1e7 observations).
+This page compares the speed of R and Stata for typical data analysis. Instructions are runned on randomly generated datasets of 50 Mo, 500 Mo, and 5 Go.    The graph below shows the results for the 500MB dataset (corresponding to 1e7 observations).
 
 <img class = "img-responsive"  src="/output/1e7.png" />
 
+For each data operation, I use the fatest command available in each language (to the best of my knowledge). For instance, I use `fastxtile` instead of `xtile` in Stata. Similarly, I use the package `data.table` in R.
 
 ### loading data
 R is ten times faster than Stata to read `.csv` (using the data.table command `fread` vs the Stata commands `insheet`). However, when reading or saving data in proprietary format (`.dta` for Stata and `.rds` for R), Stata is more than ten times faster.
