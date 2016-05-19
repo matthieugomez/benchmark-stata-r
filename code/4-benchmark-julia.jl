@@ -1,25 +1,22 @@
 # To run the script, download the relevant packages:
 # install.packages("data.table")
-# install.packages("readr")
 # install.packages("tidyr")
 # install.packages("statar")
+# install.packages("biglm")
 # install.packages("lfe")
-# install.packages("feather")
 
 # loading packages
 library(data.table)
-library(readr)
 library(tidyr)
 library(statar)
 library(lfe)
-library(feather)
 
 # setting options
 options(mc.cores=4)
 
 # creating the file to merge with
-DT_merge <- fread("merge.csv", data.table = FALSE)
-write_feather(DT_merge, "merge.feather")
+DTmerge <- fread("merge.csv", showProgress=FALSE)
+saveRDS(DTmerge, file = "merge.rds", compress = FALSE)
 
 
 # define the time function
@@ -29,15 +26,14 @@ time <- function(x){sum(system.time(x)[1:2])}
 benchmark <- function(file){
 	out <- NULL
 	csvfile <- paste0(file, ".csv")
-	featherfile <- paste0(file, ".feather")
+	rdsfile <- paste0(file, ".rds")
 
 	# write and read
-	out[length(out)+1] <- time(DT <- fread(csvfile, data.table = FALSE))
-	out[length(out)+1] <- time(write_feather(DT, featherfile))
-	out[length(out)+1] <- time(DT <- read_feather(featherfile))
+	out[length(out)+1] <- time(DT <- fread(csvfile, showProgress=FALSE))
+	out[length(out)+1] <- time(saveRDS(DT, file = rdsfile, compress = FALSE))
+	out[length(out)+1] <- time(DT <- readRDS(rdsfile))
 
 	# sort and duplicates  
-	setDT(DT)
 	out[length(out)+1] <- time(setkeyv(DT, c("id3")))
 	out[length(out)+1] <- time(setkeyv(DT, c("id6")))
 	out[length(out)+1] <- time(setkeyv(DT, c("v3")))
@@ -48,10 +44,8 @@ benchmark <- function(file){
 
 
 	# merge 
-	DT <- read_feather(featherfile) 
-	setDT(DT)
-	DT_merge <- read_feather("merge.feather")
-	setDT(DT_merge)
+	DT <- readRDS(rdsfile) 
+	DT_merge <- readRDS("merge.rds")
 	f <- function(){
 		setkey(DT, id1, id3)
 		setkey(DT_merge, id1, id3) 
@@ -64,8 +58,7 @@ benchmark <- function(file){
 	out[length(out)+1] <- time(rbindlist(list(DT,DT1), fill = TRUE))
 
 	# reshape
-	DT <- read_feather(featherfile) 
-	setDT(DT)
+	DT <- readRDS(rdsfile) 
 	DT1 <- unique(DT, by = c("id1", "id2", "id3"))
 	DT1 <- DT1[1:(nrow(DT1)/10)]
 	out[length(out)+1] <- time(DT2 <- gather(DT1, variable, value, id4, id5, id6, v1, v2, v3))
@@ -83,7 +76,7 @@ benchmark <- function(file){
 	DT[, v1_name := NULL]
 
 	# functions
-	out[length(out)+1] <- time(DT[, temp := xtile(v3, 10)])
+	out[length(out)+1] <- time(DT[, temp := bin(v3, 10)])
 	DT[, temp := NULL] 
 	out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id1", "id2", "id3")])
 	DT[, temp := NULL] 
@@ -137,7 +130,8 @@ benchmark <- function(file){
 	}
 	out[length(out)+1] <- time(DT[, temp := loop_generate(nrow(DT))])
 
-	out[length(out)+1] <- time(crossprod(as.matrix(DT[, list(v2, id4, id5, id6)])))
+	setDF(DT)
+	out[length(out)+1] <- time(crossprod(as.matrix(select(DT, v2, id4, id5, id6))))
 	setDT(DT)
 
 

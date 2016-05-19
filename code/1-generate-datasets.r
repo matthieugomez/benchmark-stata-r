@@ -1,4 +1,5 @@
 library(data.table)
+library(readr)
 K <- 100
 set.seed(1)
 for (file in c("2e6", "1e7", "1e8")){
@@ -14,10 +15,11 @@ for (file in c("2e6", "1e7", "1e8")){
 	  v2 =  sample(1e6, N, TRUE),                        # int in range [1,1e6]
 	  v3 =  sample(round(runif(100,max=100),4), N, TRUE) # numeric e.g. 23.5749
 	)
-	write.table(DT,paste0(file,".csv"),row.names=F, sep="\t")
+	write_csv(DT,paste0(file,".csv"))
 
 	if (file == "2e6"){
 		DT_merge <- unique(DT, by = c("id1", "id3"))
-		write.table(DT_merge,"merge.csv",row.names=F, sep="\t")
+		write_csv(DT_merge,"merge.csv")
 	}
 }
+
