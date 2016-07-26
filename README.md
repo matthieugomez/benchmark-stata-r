@@ -7,21 +7,11 @@ This page compares the speed of R and Stata for typical data analysis. Instructi
 
 For each data operation, I use the fatest command available in each language (to the best of my knowledge). For instance, I use `fastxtile` instead of `xtile` in Stata. Similarly, I use the package `data.table` in R.
 
-### loading data
-R is ten times faster than Stata to read `.csv` (using the data.table command `fread` vs the Stata commands `insheet`). However, when reading or saving data in proprietary format (`.dta` for Stata and `.rds` for R), Stata is more than ten times faster.
-
-### manipulating data
-The package `data.table` is 10x faster than Stata for the principal commands of data cleaning: sorting, applying functions within groups, reshaping, joining multiple datasets. Moreover, the difference grows with the dataset size. The difference mostly reflects the fact that data.table uses more efficient algorithms than the ones used in Stata 13.
-
-
-### estimating models 
-R is much slower than Stata to estimate linear models (even using specialized packages such as `biglm` or `speedlm`). It may come from a variety of reasons: Stata is multi threaded, Stata datasets are in row major order while R datasets are in column major orders. That being said, for models with high dimensional fixed effect(s), `felm` is faster than the corresponding Stata commands `areg/reghdfe`. This difference reflects the fact that `reghdfe` is written in Mata while `felm` is partly written in C.
-
 
 
 ## Code
 
-All the code below can be downloaded in the code folder in the repository.
+The code below can be downloaded in the code folder in the repository.
 
 ### Data
 
