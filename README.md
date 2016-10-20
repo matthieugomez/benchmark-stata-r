@@ -1,7 +1,7 @@
 # Benchmarks
 
 ## Results
-This page compares the speed of R and Stata for typical data analysis. Instructions are runned on randomly generated datasets of 50 Mo, 500 Mo, and 5 Go.    The graph below shows the results for the 500MB dataset (corresponding to 1e7 observations).
+This page compares the speed of R and Stata for typical data analysis. Instructions are run on randomly generated datasets of 50 MB, 500 MB, and 5 GB.    The graph below shows the results for the 500MB dataset (corresponding to 1e7 observations).
 
 <img class = "img-responsive"  src="/output/1e7.png" />
 
@@ -49,7 +49,7 @@ This script creates four files required in the R and Stata scripts: "2e6.csv", "
 
 ### R Code
 
-I runned the R script in the file [2-benchmark-r.r](code/2-benchmark-r.r):
+I ran the R script in the file [2-benchmark-r.r](code/2-benchmark-r.r):
 
 ```R
 # To run the script, download the relevant packages:
@@ -211,7 +211,7 @@ benchmark("1e8")
 
 ### Stata code
 
-I runned the Stata script in the file [3-benchmark-stata.do](code/3-benchmark-stata.do):
+I ran the Stata script in the file [3-benchmark-stata.do](code/3-benchmark-stata.do):
 
 ```
 /***************************************************************************************************
@@ -483,9 +483,9 @@ other attached packages:
 ````
 
 ## All results
-#### 2e6 observations (50Mo)
+#### 2e6 observations (50MB)
 <img class = "img-responsive"  src="/output/2e6.png" />
-#### 1e7 observations (500Mo)
+#### 1e7 observations (500MB)
 <img class = "img-responsive"  src="/output/1e7.png" />
-#### 1e8 observations (5Go)
+#### 1e8 observations (5GB)
 <img class = "img-responsive"  src="/output/1e8.png" />
