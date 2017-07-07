@@ -7,8 +7,6 @@ This page compares the speed of R and Stata for typical data analysis. Instructi
 <img class = "img-responsive"  src="/output/1e7.png" />
 
 
-
-
 ## Code
 
 All the code below can be downloaded in the code folder in the repository.
