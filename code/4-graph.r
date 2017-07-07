@@ -12,7 +12,7 @@ DT[, Stata := DT2[["result"]]]
 DT=gather(DT, language, value, Stata, R)
 setDT(DT)
 DT[,value:=value/60]
-DT[, command = factor(command, levels=rev(unique(command)))]
+DT[, command := factor(command, levels=rev(unique(command)))]
 
 DT[command == "open csv", value := value/3]
 DT[command == "group", value := value/2]
