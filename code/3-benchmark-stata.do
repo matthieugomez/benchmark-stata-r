@@ -65,6 +65,7 @@ Tic, n(`++i')
 save "~/1e7.dta", replace
 Toc, n(`i')
 
+drop _all 
 Tic, n(`++i')
 use "~/1e7.dta", clear
 Toc, n(`i')

@@ -29,11 +29,11 @@ names <- NULL
 
 # write and read
 names[length(names)+1] <- "open csv"
-out[length(out)+1] <- time(DT <- fread("1e7.csv", data.table = FALSE))
+out[length(out)+1] <- time(DT <- fread("~/1e7.csv", data.table = FALSE))
 names[length(names)+1] <- "save"
-out[length(out)+1] <- time(write.fst(DT, "1e7.fst"))
+out[length(out)+1] <- time(write.fst(DT, "~/1e7.fst"))
 names[length(names)+1] <- "open"
-out[length(out)+1] <- time(DT <- read.fst("1e7.fst"))
+out[length(out)+1] <- time(DT <- read.fst("~/1e7.fst"))
 
 # sort and duplicates  
 setDT(DT)
@@ -54,7 +54,7 @@ out[length(out)+1] <- time(unique(DT, by = c("id2", "id3")))
 
 
 # merge 
-DT <- read.fst("1e7.fst") 
+DT <- read.fst("~/1e7.fst") 
 setDT(DT)
 f <- function(){
 	DT_merge <- read.fst("merge.fst")
@@ -72,7 +72,7 @@ DT1 <- copy(DT)
 out[length(out)+1] <- time(rbindlist(list(DT,DT1), fill = TRUE))
 
 # reshape
-DT <- read.fst("1e7.fst") 
+DT <- read.fst("~/1e7.fst") 
 setDT(DT)
 DT1 <- unique(DT, by = c("id1", "id2", "id3"))
 DT1 <- DT1[1:(nrow(DT1)/10)]
