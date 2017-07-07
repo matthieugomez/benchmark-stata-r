@@ -54,7 +54,6 @@ out[length(out)+1] <- time(uniqueN(DT, by = c("id1", "id2", "id3")))
 names[length(names)+1] <- "keep distinct"
 out[length(out)+1] <- time(unique(DT, by = c("id2", "id3")))
 
-
 # merge 
 DT <- read.fst("~/1e7.fst") 
 setDT(DT)

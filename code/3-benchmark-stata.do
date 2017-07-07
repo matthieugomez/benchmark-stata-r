@@ -186,13 +186,13 @@ reg v3 i.v1 v2 id4 id5
 Toc, n(`i')
 
 Tic, n(`++i')
-areg v3 v2 id4 id5 i.v1, a(id6) cl(id6)
+reghdfe v3 v2 id4 id5 i.v1, a(id6) cl(id6)
 Toc, n(`i')
 
 
 fegen g = group(id3)
 Tic, n(`++i')
-cap reghdfe v3 v2 id4 id5 i.v1, absorb(id6 g) vce(cluster id6)  tolerance(1e-6) fast
+reghdfe v3 v2 id4 id5 i.v1, absorb(id6 g) vce(cluster id6)  tolerance(1e-6) fast
 Toc, n(`i')
 
 
