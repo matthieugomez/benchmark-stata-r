@@ -9,14 +9,16 @@
 library(data.table)
 library(tidyr)
 library(lfe)
+library(statar)
 library(fst)
 
 # setting options
 options(mc.cores=4)
 
 # creating the file to merge with
-DT_merge <- fread("merge.csv", data.table = FALSE)
-write.fst(DT_merge, "merge.fst")
+write.fst(fread("~/merge_string.csv", data.table = FALSE), "~/merge_string.fst")
+write.fst(fread("~/merge_int.csv", data.table = FALSE), "~/merge_int.fst")
+
 
 
 # define the time function
@@ -30,9 +32,9 @@ names <- NULL
 # write and read
 names[length(names)+1] <- "open csv"
 out[length(out)+1] <- time(DT <- fread("~/1e7.csv", data.table = FALSE))
-names[length(names)+1] <- "save"
+names[length(names)+1] <- "save binary"
 out[length(out)+1] <- time(write.fst(DT, "~/1e7.fst"))
-names[length(names)+1] <- "open"
+names[length(names)+1] <- "open binary"
 out[length(out)+1] <- time(DT <- read.fst("~/1e7.fst"))
 
 # sort and duplicates  
@@ -57,14 +59,27 @@ out[length(out)+1] <- time(unique(DT, by = c("id2", "id3")))
 DT <- read.fst("~/1e7.fst") 
 setDT(DT)
 f <- function(){
-	DT_merge <- read.fst("merge.fst")
+	DT_merge <- read.fst("merge_string.fst")
 	setDT(DT_merge)
 	setkeyv(DT, c("id1", "id3"))
 	setkeyv(DT_merge, c("id1", "id3")) 
 	merge(DT, DT_merge, all.x = TRUE, all.y = FALSE) 
 }
-names[length(names)+1] <- "merge"
+names[length(names)+1] <- "merge string"
 out[length(out)+1] <- time(f())
+
+DT <- read.fst("~/1e7.fst") 
+setDT(DT)
+f <- function(){
+	DT_merge <- read.fst("merge_int.fst")
+	setDT(DT_merge)
+	setkeyv(DT, c("id4", "id6"))
+	setkeyv(DT_merge, c("id4", "id6")) 
+	merge(DT, DT_merge, all.x = TRUE, all.y = FALSE) 
+}
+names[length(names)+1] <- "merge int"
+out[length(out)+1] <- time(f())
+
 
 # append 
 names[length(names)+1] <- "append"
@@ -149,4 +164,4 @@ out[length(out)+1] <- time(felm(v3 ~  v2 + id4 + id5  + as.factor(v1) | id6 + id
 
 
 # run benchmark
-fwrite(data.table(command = names, result = out), "resultR1e7.csv")
+fwrite(data.table(command = names, result = out), "~/resultR1e7.csv")

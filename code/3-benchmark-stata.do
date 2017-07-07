@@ -7,33 +7,13 @@ ssc install ftools
 ***************************************************************************************************/
 
 /* create the file to merge with */
-import delimited using "~/merge.csv", clear
-save "~/merge.dta", replace
+import delimited using "~/merge_string.csv", clear
+save "~/merge_string.dta", replace
 
-/***************************************************************************************************
-mata
-***************************************************************************************************/
-mata: 
-void loop_sum(string scalar y, real scalar first, real scalar last){
-	real scalar index, a, obs
-	index =  st_varindex(y)
-	a = 0
-	for (obs = first ; obs <= last ; obs++){
-		a = a + _st_data(obs, index) 
-	}
-}
+import delimited using "~/merge_int.csv", clear
+save "~/merge_int.dta", replace
 
 
-mata:
-	void loop_generate(string scalar newvar, real scalar first, real scalar last){
-		real scalar index, obs
-		index = st_addvar("float", newvar)
-		for (obs = first ; obs <= last ; obs++){
-			st_store(obs, index, 1) 
-		}
-	}
-
-end
 
 
 /***************************************************************************************************
@@ -103,8 +83,15 @@ Toc, n(`i')
 /* merge */
 use "~/1e7.dta", clear
 Tic, n(`++i')
-merge m:1 id1 id3 using "~/merge.dta", keep(master matched) nogen
+merge m:1 id1 id3 using "~/merge_string.dta", keep(master matched) nogen
 Toc, n(`i')
+
+
+use "~/1e7.dta", clear
+Tic, n(`++i')
+merge m:1 id4 id6 using "~/merge_int.dta", keep(master matched) nogen
+Toc, n(`i')
+
 
 /* append */
 use "~/1e7.dta", clear

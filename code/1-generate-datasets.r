@@ -16,6 +16,7 @@ DT <- data.table(
   v3 =  sample(round(runif(100,max=100),4), N, TRUE) # numeric e.g. 23.5749
 )
 fwrite(DT, "~/1e7.csv")
-fwrite(unique(DT, by = c("id1", "id3")),"~/merge.csv")
+fwrite(unique(DT, by = c("id1", "id3")),"~/merge_string.csv")
+fwrite(unique(DT, by = c("id4", "id6")),"~/merge_int.csv")
 
 
