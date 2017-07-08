@@ -45,12 +45,10 @@ names[length(names)+1] <- "sort int"
 out[length(out)+1] <- time(setkeyv(DT, c("id6")))
 names[length(names)+1] <- "sort float"
 out[length(out)+1] <- time(setkeyv(DT, c("v3")))
-names[length(names)+1] <- "sort all"
-out[length(out)+1] <- time(setkeyv(DT, c("id1","id2","id3", "id4", "id5", "id6")))
-names[length(names)+1] <- "distinct by int"
+names[length(names)+1] <- "distinct by strings"
 out[length(out)+1] <- time(uniqueN(DT, by = c("id3")))
-names[length(names)+1] <- "distinct by 3 int"
-out[length(out)+1] <- time(uniqueN(DT, by = c("id1", "id2", "id3")))
+names[length(names)+1] <- "distinct by int"
+out[length(out)+1] <- time(uniqueN(DT, by = c("id6")))
 
 # merge 
 DT <- read.fst("~/1e7.fst") 
@@ -110,44 +108,43 @@ names[length(names)+1] <- "xtile"
 out[length(out)+1] <- time(DT[, temp := xtile(v3, 10)])
 DT[, temp := NULL] 
 names[length(names)+1] <- "group strings"
-out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id1", "id2")])
+out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id1", "id3")])
 DT[, temp := NULL]
 names[length(names)+1] <- "group int"
-out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id4", "id5")])
+out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id4", "id6")])
 DT[, temp := NULL]
 
-# sum of large groups
-names[length(names)+1] <- "sum large group"
+# sum groups
+names[length(names)+1] <- "sum few string group"
 out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id1")])
 DT[, temp := NULL] 
-# sum of smaller groups
-names[length(names)+1] <- "sum small group"
+names[length(names)+1] <- "sum many string groups"
 out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id3")])
 DT[, temp := NULL] 
-# groups defined by int
-names[length(names)+1] <- "mean small group"
-out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id6")])
+names[length(names)+1] <- "sum few int groups"
+out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id4")])
+DT[, temp := NULL] 
+names[length(names)+1] <- "sum many int groups"
+out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id6")])
 DT[, temp := NULL] 
 
 
+# sd groups
+names[length(names)+1] <- "sd few int groups"
+out[length(out)+1] <- time(DT[, temp := sd(v3, na.rm = TRUE), by = c("id4")])
+DT[, temp := NULL] 
+names[length(names)+1] <- "sd many int groups"
+out[length(out)+1] <- time(DT[, temp := sd(v3, na.rm = TRUE), by = c("id6")])
+DT[, temp := NULL] 
 
-# groups defined by multiple string
-names[length(names)+1] <- "mean large group"
-out[length(out)+1] <- time(DT[, temp := mean(v3, na.rm = TRUE) , by = c("id1", "id2", "id3")])
-DT[, temp := NULL] 
-names[length(names)+1] <- "sd small groups"
-out[length(out)+1] <- time(DT[, temp := sd(v3, na.rm = TRUE), by = c("id3")])
-DT[, temp := NULL] 
-names[length(names)+1] <- "sd large groups"
-out[length(out)+1] <- time(DT[, temp := sd(v3, na.rm = TRUE), by = c("id1", "id2", "id3")])
-DT[, temp := NULL] 
+
 
 # collapse large groups
-names[length(names)+1] <- "collapse large groups"
+names[length(names)+1] <- "collapse few groups"
 out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id1")])
 
 # collapse small groups
-names[length(names)+1] <- "collapse small groups"
+names[length(names)+1] <- "collapse many groups"
 out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id3")])
 
 

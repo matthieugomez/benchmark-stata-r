@@ -32,6 +32,12 @@ program define Toc
 	timer off `n'
 end
 
+
+/***************************************************************************************************
+
+***************************************************************************************************/
+
+
 /* benchmark */
 set processors 4
 
@@ -65,18 +71,12 @@ sort v3
 Toc, n(`i')
 
 Tic, n(`++i')
-sort id1 id2 id3 id4 id5 id6
-Toc, n(`i')
-
-Tic, n(`++i')
 distinct id3
 Toc, n(`i')
 
-
 Tic, n(`++i')
-distinct id1 id2 id3, joint
+distinct id6
 Toc, n(`i')
-
 
 /* merge */
 use "~/1e7.dta", clear
@@ -127,13 +127,12 @@ Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-egen temp = group(id1 id2)
+egen temp = group(id1 id3)
 Toc, n(`i')
 drop temp
 
-local i = 0
 Tic, n(`++i')
-fegen temp = group(id4 id5)
+fegen temp = group(id4 id6)
 Toc, n(`i')
 drop temp
 
@@ -150,24 +149,26 @@ Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-egen temp = mean(v3), by(id6)
+egen temp = sum(v3), by(id4)
 Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-egen temp = mean(v3),by(id1 id2 id3)
+egen temp = sum(v3), by(id6)
+Toc, n(`i')
+drop temp
+
+
+Tic, n(`++i')
+egen temp = sd(v3), by(id4)
 Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-egen temp = sd(v3), by(id3)
+egen temp = sd(v3), by(id6)
 Toc, n(`i')
 drop temp
 
-Tic, n(`++i')
-egen temp = sd(v3), by(id1 id2 id3)
-Toc, n(`i')
-drop temp
 
 Tic, n(`++i')
 fcollapse (mean) v1 v2 (sum) v3,  by(id1) fast
