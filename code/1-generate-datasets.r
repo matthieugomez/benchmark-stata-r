@@ -1,9 +1,8 @@
 library(data.table)
 library(readr)
 K <- 100
-N <- 1e7
+N <- 1e7L
 set.seed(1)
-N <- as.integer("1e7")
 DT <- data.table(
   id1 = sample(sprintf("id%03d",1:K), N, TRUE),      # large groups (char)
   id2 = sample(sprintf("id%03d",1:K), N, TRUE),      # large groups (char)
@@ -16,7 +15,7 @@ DT <- data.table(
   v3 =  sample(round(runif(100,max=100),4), N, TRUE) # numeric e.g. 23.5749
 )
 fwrite(DT, "~/1e7.csv")
-fwrite(unique(DT, by = c("id1", "id3")),"~/merge_string.csv")
-fwrite(unique(DT, by = c("id4", "id6")),"~/merge_int.csv")
+fwrite(unique(DT[, list(id1, id3)]),"~/merge_string.csv")
+fwrite(unique(DT[, list(id4, id6)]),"~/merge_int.csv")
 
 

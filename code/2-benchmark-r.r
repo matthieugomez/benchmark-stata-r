@@ -51,8 +51,6 @@ names[length(names)+1] <- "distinct by int"
 out[length(out)+1] <- time(uniqueN(DT, by = c("id3")))
 names[length(names)+1] <- "distinct by 3 int"
 out[length(out)+1] <- time(uniqueN(DT, by = c("id1", "id2", "id3")))
-names[length(names)+1] <- "keep distinct"
-out[length(out)+1] <- time(unique(DT, by = c("id2", "id3")))
 
 # merge 
 DT <- read.fst("~/1e7.fst") 
@@ -111,8 +109,11 @@ DT[, v1_name := NULL]
 names[length(names)+1] <- "xtile"
 out[length(out)+1] <- time(DT[, temp := xtile(v3, 10)])
 DT[, temp := NULL] 
-names[length(names)+1] <- "group"
-out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id1", "id2", "id3")])
+names[length(names)+1] <- "group strings"
+out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id1", "id2")])
+DT[, temp := NULL]
+names[length(names)+1] <- "group int"
+out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id4", "id5")])
 DT[, temp := NULL]
 
 # sum of large groups

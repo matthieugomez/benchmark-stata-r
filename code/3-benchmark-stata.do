@@ -8,6 +8,7 @@ ssc install ftools
 
 /* create the file to merge with */
 import delimited using "~/merge_string.csv", clear
+autorename
 save "~/merge_string.dta", replace
 
 import delimited using "~/merge_int.csv", clear
@@ -76,9 +77,6 @@ Tic, n(`++i')
 distinct id1 id2 id3, joint
 Toc, n(`i')
 
-Tic, n(`++i')
-duplicates drop id2 id3, force
-Toc, n(`i')
 
 /* merge */
 use "~/1e7.dta", clear
@@ -89,7 +87,7 @@ Toc, n(`i')
 
 use "~/1e7.dta", clear
 Tic, n(`++i')
-merge m:1 id4 id6 using "~/merge_int.dta", keep(master matched) nogen
+fmerge m:1 id4 id6 using "~/merge_int.dta", keep(master matched) nogen
 Toc, n(`i')
 
 
@@ -129,9 +127,16 @@ Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-fegen temp = group(id1 id2 id3)
+egen temp = group(id1 id2)
 Toc, n(`i')
 drop temp
+
+local i = 0
+Tic, n(`++i')
+fegen temp = group(id4 id5)
+Toc, n(`i')
+drop temp
+
 
 /* split apply combine */ 
 Tic, n(`++i')
@@ -186,13 +191,13 @@ reg v3 i.v1 v2 id4 id5
 Toc, n(`i')
 
 Tic, n(`++i')
-reghdfe v3 v2 id4 id5 i.v1, a(id6) cl(id6)
+reghdfe v3 v2 id4 id5 i.v1, a(id6) vce(cluster id6) tolerance(1e-6)
 Toc, n(`i')
 
 
 fegen g = group(id3)
 Tic, n(`++i')
-reghdfe v3 v2 id4 id5 i.v1, absorb(id6 g) vce(cluster id6)  tolerance(1e-6) fast
+reghdfe v3 v2 id4 id5 i.v1, absorb(id6 g) vce(cluster id6)  tolerance(1e-6)
 Toc, n(`i')
 
 
