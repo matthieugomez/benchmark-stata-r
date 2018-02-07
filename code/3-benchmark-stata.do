@@ -1,9 +1,8 @@
 /***************************************************************************************************
 To run the script, download the following packages:
-ssc install distinct
 ssc install reghdfe
-ssc install fastxtile
 ssc install ftools
+ssc install gtools
 ***************************************************************************************************/
 
 /* create the file to merge with */
@@ -122,61 +121,61 @@ drop v1_name
 
 /* functions */
 Tic, n(`++i')
-fasterxtile temp = v3, n(10)
+gquantiles temp = v3, n(10) xtile
 Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-egen temp = group(id1 id3)
+gegen temp = group(id1 id3)
 Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-egen temp = group(id4 id6)
+gegen temp = group(id4 id6)
 Toc, n(`i')
 drop temp
 
 
 /* split apply combine */ 
 Tic, n(`++i')
-egen temp = sum(v3), by(id1)
+gegen temp = sum(v3), by(id1)
 Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-egen temp = sum(v3), by(id3)
+gegen temp = sum(v3), by(id3)
 Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-egen temp = sum(v3), by(id4)
+gegen temp = sum(v3), by(id4)
 Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-egen temp = sum(v3), by(id6)
-Toc, n(`i')
-drop temp
-
-
-Tic, n(`++i')
-egen temp = sd(v3), by(id4)
-Toc, n(`i')
-drop temp
-
-Tic, n(`++i')
-egen temp = sd(v3), by(id6)
+gegen temp = sum(v3), by(id6)
 Toc, n(`i')
 drop temp
 
 
 Tic, n(`++i')
-collapse (mean) v1 v2 (sum) v3,  by(id1) fast
+gegen temp = sd(v3), by(id4)
+Toc, n(`i')
+drop temp
+
+Tic, n(`++i')
+gegen temp = sd(v3), by(id6)
+Toc, n(`i')
+drop temp
+
+
+Tic, n(`++i')
+gcollapse (mean) v1 v2 (sum) v3,  by(id1) fast
 Toc, n(`i')
 
 use "~/1e7.dta", clear
 Tic, n(`++i')
-collapse (mean) v1 v2 (sum) v3,  by(id3) fast
+gcollapse (mean) v1 v2 (sum) v3,  by(id3) fast
 Toc, n(`i')
 
 
@@ -196,7 +195,7 @@ reghdfe v3 v2 id4 id5 i.v1, a(id6) vce(cluster id6) tolerance(1e-6)
 Toc, n(`i')
 
 
-egen g = group(id3)
+gegen g = group(id3)
 Tic, n(`++i')
 reghdfe v3 v2 id4 id5 i.v1, absorb(id6 g) vce(cluster id6)  tolerance(1e-6)
 Toc, n(`i')

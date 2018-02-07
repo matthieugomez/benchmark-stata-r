@@ -115,36 +115,36 @@ out[length(out)+1] <- time(DT[, temp := .GRP, by =  c("id4", "id6")])
 DT[, temp := NULL]
 
 # sum groups
-names[length(names)+1] <- "sum over few string group"
+names[length(names)+1] <- "sum over large groups (string)"
 out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id1")])
 DT[, temp := NULL] 
-names[length(names)+1] <- "sum over many string groups"
+names[length(names)+1] <- "sum over small groups (string)"
 out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id3")])
 DT[, temp := NULL] 
-names[length(names)+1] <- "sum over few int groups"
+names[length(names)+1] <- "sum over large groups (int)"
 out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id4")])
 DT[, temp := NULL] 
-names[length(names)+1] <- "sum over many int groups"
+names[length(names)+1] <- "sum over small groups (int)"
 out[length(out)+1] <- time(DT[, temp := sum(v3, na.rm = TRUE), by = c("id6")])
 DT[, temp := NULL] 
 
 
 # sd groups
-names[length(names)+1] <- "sd over few int groups"
+names[length(names)+1] <- "sd over large groups (int)"
 out[length(out)+1] <- time(DT[, temp := sd(v3, na.rm = TRUE), by = c("id4")])
 DT[, temp := NULL] 
-names[length(names)+1] <- "sd over many int groups"
+names[length(names)+1] <- "sd over small groups (int)"
 out[length(out)+1] <- time(DT[, temp := sd(v3, na.rm = TRUE), by = c("id6")])
 DT[, temp := NULL] 
 
 
 
 # collapse large groups
-names[length(names)+1] <- "collapse over few groups"
+names[length(names)+1] <- "collapse over large groups"
 out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id1")])
 
 # collapse small groups
-names[length(names)+1] <- "collapse over many groups"
+names[length(names)+1] <- "collapse over small groups"
 out[length(out)+1] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE), v3 = sum(v3, na.rm = TRUE),  sd = sd(v3, na.rm = TRUE)), by = c("id3")])
 
 
