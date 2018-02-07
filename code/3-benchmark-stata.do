@@ -71,17 +71,17 @@ sort v3
 Toc, n(`i')
 
 Tic, n(`++i')
-distinct id3
+gdistinct id3
 Toc, n(`i')
 
 Tic, n(`++i')
-distinct id6
+gdistinct id6
 Toc, n(`i')
 
 /* merge */
 use "~/1e7.dta", clear
 Tic, n(`++i')
-merge m:1 id1 id3 using "~/merge_string.dta", keep(master matched) nogen
+fmerge m:1 id1 id3 using "~/merge_string.dta", keep(master matched) nogen
 Toc, n(`i')
 
 
@@ -122,7 +122,7 @@ drop v1_name
 
 /* functions */
 Tic, n(`++i')
-fastxtile temp = v3, n(10)
+fasterxtile temp = v3, n(10)
 Toc, n(`i')
 drop temp
 
@@ -132,7 +132,7 @@ Toc, n(`i')
 drop temp
 
 Tic, n(`++i')
-fegen temp = group(id4 id6)
+egen temp = group(id4 id6)
 Toc, n(`i')
 drop temp
 
@@ -171,12 +171,12 @@ drop temp
 
 
 Tic, n(`++i')
-fcollapse (mean) v1 v2 (sum) v3,  by(id1) fast
+collapse (mean) v1 v2 (sum) v3,  by(id1) fast
 Toc, n(`i')
 
 use "~/1e7.dta", clear
 Tic, n(`++i')
-fcollapse (mean) v1 v2 (sum) v3,  by(id3) fast
+collapse (mean) v1 v2 (sum) v3,  by(id3) fast
 Toc, n(`i')
 
 
@@ -196,7 +196,7 @@ reghdfe v3 v2 id4 id5 i.v1, a(id6) vce(cluster id6) tolerance(1e-6)
 Toc, n(`i')
 
 
-fegen g = group(id3)
+egen g = group(id3)
 Tic, n(`++i')
 reghdfe v3 v2 id4 id5 i.v1, absorb(id6 g) vce(cluster id6)  tolerance(1e-6)
 Toc, n(`i')
