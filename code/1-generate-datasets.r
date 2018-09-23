@@ -1,3 +1,6 @@
+# To run the script, download the relevant packages:
+# install.packages("data.table")
+
 library(data.table)
 library(readr)
 K <- 20
