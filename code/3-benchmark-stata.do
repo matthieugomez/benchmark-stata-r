@@ -1,8 +1,9 @@
 /***************************************************************************************************
 To run the script, download the following packages:
-ssc install reghdfe
 ssc install ftools
 ssc install gtools
+ssc install fastreshape
+ssc install reghdfe
 ***************************************************************************************************/
 
 /* create the file to merge with */
@@ -103,10 +104,10 @@ foreach v of varlist id4 id5 id6 v1 v2 v3{
 	rename `v' v_`v'
 }
 Tic, n(`++i')
-reshape long v_, i(id1 id2 id3) j(variable) string
+fastreshape long v_, i(id1 id2 id3) j(variable) string
 Toc, n(`i')
 Tic, n(`++i')
-reshape wide v_, i(id1 id2 id3) j(variable) string
+fastreshape wide v_, i(id1 id2 id3) j(variable) string
 Toc, n(`i')
 
 /* recode */
