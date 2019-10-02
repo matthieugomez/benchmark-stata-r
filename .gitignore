@@ -5,3 +5,4 @@
 /output/results_graph.r
 *.rds
 *.dta
+dataset/*

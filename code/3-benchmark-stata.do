@@ -7,12 +7,12 @@ ssc install reghdfe
 ***************************************************************************************************/
 
 /* create the file to merge with */
-import delimited using "~/merge_string.csv", clear
+import delimited using "~/statabenchmark/merge_string.csv", clear
 autorename
-save "~/merge_string.dta", replace
+save "~/statabenchmark/merge_string.dta", replace
 
-import delimited using "~/merge_int.csv", clear
-save "~/merge_int.dta", replace
+import delimited using "~/statabenchmark/merge_int.csv", clear
+save "~/statabenchmark/merge_int.dta", replace
 
 
 
@@ -39,22 +39,22 @@ end
 
 
 /* benchmark */
-set processors 4
+set processors 2
 
 timer clear
 local i = 0
 /* write and read */
 Tic, n(`++i')
-import delimited using "~/1e7.csv", clear
+import delimited using "~/statabenchmark/1e7.csv", clear
 Toc, n(`i')
 
 Tic, n(`++i')
-save "~/1e7.dta", replace
+save "~/statabenchmark/1e7.dta", replace
 Toc, n(`i')
 
 drop _all 
 Tic, n(`++i')
-use "~/1e7.dta", clear
+use "~/statabenchmark/1e7.dta", clear
 Toc, n(`i')
 
 /* sort  */
@@ -79,22 +79,22 @@ gdistinct id6
 Toc, n(`i')
 
 /* merge */
-use "~/1e7.dta", clear
+use "~/statabenchmark/1e7.dta", clear
 Tic, n(`++i')
-fmerge m:1 id1 id3 using "~/merge_string.dta", keep(master matched) nogen
+fmerge m:1 id1 id3 using "~/statabenchmark/merge_string.dta", keep(master matched) nogen
 Toc, n(`i')
 
 
-use "~/1e7.dta", clear
+use "~/statabenchmark/1e7.dta", clear
 Tic, n(`++i')
-fmerge m:1 id4 id6 using "~/merge_int.dta", keep(master matched) nogen
+fmerge m:1 id4 id6 using "~/statabenchmark/merge_int.dta", keep(master matched) nogen
 Toc, n(`i')
 
 
 /* append */
-use "~/1e7.dta", clear
+use "~/statabenchmark/1e7.dta", clear
 Tic, n(`++i')
-append using "~/1e7.dta"
+append using "~/statabenchmark/1e7.dta"
 Toc, n(`i')
 
 /* reshape */
@@ -104,14 +104,14 @@ foreach v of varlist id4 id5 id6 v1 v2 v3{
 	rename `v' v_`v'
 }
 Tic, n(`++i')
-fastreshape long v_, i(id1 id2 id3) j(variable) string
+greshape long v_, i(id1 id2 id3) j(variable) string
 Toc, n(`i')
 Tic, n(`++i')
-fastreshape wide v_, i(id1 id2 id3) j(variable) string
+greshape wide v_, i(id1 id2 id3) j(variable) string
 Toc, n(`i')
 
 /* recode */
-use "~/1e7.dta", clear
+use "~/statabenchmark/1e7.dta", clear
 Tic, n(`++i')
 gen v1_name = ""
 replace v1_name = "first" if v1 == 1
@@ -174,14 +174,14 @@ Tic, n(`++i')
 gcollapse (mean) v1 v2 (sum) v3,  by(id1) fast
 Toc, n(`i')
 
-use "~/1e7.dta", clear
+use "~/statabenchmark/1e7.dta", clear
 Tic, n(`++i')
 gcollapse (mean) v1 v2 (sum) v3,  by(id3) fast
 Toc, n(`i')
 
 
 /* regress */
-use "~/1e7.dta", clear
+use "~/statabenchmark/1e7.dta", clear
 keep if _n <= _N/2
 Tic, n(`++i')
 reg v3 v1 v2 id4 id5
@@ -202,13 +202,13 @@ reghdfe v3 v2 id4 id5 i.v1, absorb(id6 g) vce(cluster id6)  tolerance(1e-6)
 Toc, n(`i')
 
 
-timer list
 drop _all
 gen result = .
 local i = 1
+timer list
 while r(nt`i') < .{
 	set obs `i'
 	replace result = r(t`i') if _n == `i'
 	local i = `i' + 1
 }
-outsheet using "~/resultStata1e7.csv", replace
+outsheet using "~/statabenchmark/resultStata1e7.csv", replace
