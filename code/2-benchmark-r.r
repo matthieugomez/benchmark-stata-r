@@ -96,7 +96,7 @@ out[i] <- time(rbindlist(list(DT,DT1), fill = TRUE))
 DT <- read.fst("~/statabenchmark/1e7.fst") 
 setDT(DT)
 DT1 <- unique(DT, by = c("id1", "id2", "id3"))
-DT1 <- DT1[1:(nrow(DT1)/10)]
+DT1 <- DT1[1:(nrow(DT1)/10),]
 i <- i + 1
 names[i] <- "reshape long"
 out[i] <- time(DT2 <- gather(DT1, variable, value, id4, id5, id6, v1, v2, v3))
@@ -174,7 +174,7 @@ out[i] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE
 
 
 # regress
-DT1 <- DT[1:(nrow(DT)/2)]
+DT1 <- DT[1:(nrow(DT)/2),]
 i <- i + 1
 names[i] <- "reg"
 out[i] <- time(felm(v3 ~ v1 + v2 + id4 + id5, DT1))
