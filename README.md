@@ -19,16 +19,16 @@ The Stata code in the file [3-benchmark-stata.do](code/3-benchmark-stata.do):
 
 The machine used for this benchmark has a 3.5 GHz Intel Core i5 (4 cores) and a SSD disk.
 
-The Stata version is Stata 13 MP.  The R session info is 
+The Stata version is Stata 16 MP.  The R session info is 
 
 ````R
-R version 3.5.0 (2018-04-23)
+R version 3.6.0 (2019-04-26)
 Platform: x86_64-apple-darwin15.6.0 (64-bit)
 Running under: macOS High Sierra 10.13.6
 
 Matrix products: default
-BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
 
 locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -37,16 +37,18 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] scales_1.0.0      ggplot2_3.0.0     stringr_1.3.1     lfe_2.8-2        
-[5] Matrix_1.2-14     tidyr_0.8.1       data.table_1.11.4
+[1] scales_1.0.0      ggplot2_3.2.1     stringr_1.4.0     fst_0.9.0        
+[5] statar_0.7.1      lfe_2.8-3         Matrix_1.2-17     tidyr_1.0.0      
+[9] data.table_1.12.2
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.18     pillar_1.3.0     compiler_3.5.0   plyr_1.8.4      
- [5] bindr_0.1.1      tools_3.5.0      tibble_1.4.2     gtable_0.2.0    
- [9] lattice_0.20-35  pkgconfig_2.0.2  rlang_0.2.2      parallel_3.5.0  
-[13] bindrcpp_0.2.2   withr_2.1.2      dplyr_0.7.6      grid_3.5.0      
-[17] tidyselect_0.2.4 glue_1.3.0       R6_2.2.2         Formula_1.2-3   
-[21] purrr_0.2.5      magrittr_1.5     assertthat_0.2.0 xtable_1.8-3    
-[25] colorspace_1.3-2 sandwich_2.5-0   stringi_1.2.4    lazyeval_0.2.1  
-[29] munsell_0.5.0    crayon_1.3.4     zoo_1.8-2  
+ [1] Rcpp_1.0.2         pillar_1.4.2       compiler_3.6.0     tools_3.6.0       
+ [5] zeallot_0.1.0      lifecycle_0.1.0    tibble_2.1.3       gtable_0.3.0      
+ [9] lattice_0.20-38    pkgconfig_2.0.3    rlang_0.4.0        parallel_3.6.0    
+[13] withr_2.1.2        dplyr_0.8.3        vctrs_0.2.0        grid_3.6.0        
+[17] tidyselect_0.2.5   glue_1.3.1         R6_2.4.0           Formula_1.2-3     
+[21] purrr_0.3.2        magrittr_1.5       ellipsis_0.3.0     backports_1.1.4   
+[25] matrixStats_0.55.0 assertthat_0.2.1   xtable_1.8-4       colorspace_1.4-1  
+[29] sandwich_2.5-1     stringi_1.4.3      lazyeval_0.2.2     munsell_0.5.0     
+[33] crayon_1.3.4       zoo_1.8-6    
 ````
