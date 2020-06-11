@@ -1,12 +1,23 @@
 /***************************************************************************************************
 To run the script, download the following packages:
-ssc install ftools
 ssc install gtools
 ssc install fastreshape
 ssc install reghdfe
 ***************************************************************************************************/
+/* timer helpers */
+cap program drop Tic
+program define Tic
+	syntax, n(integer)
+	timer on `n'
+end
 
-/* create the file to merge with */
+cap program drop Toc
+program define Toc
+	syntax, n(integer) 
+	timer off `n'
+end
+
+
 import delimited using "~/statabenchmark/merge_string.csv", clear
 autorename
 save "~/statabenchmark/merge_string.dta", replace
@@ -14,29 +25,9 @@ save "~/statabenchmark/merge_string.dta", replace
 import delimited using "~/statabenchmark/merge_int.csv", clear
 save "~/statabenchmark/merge_int.dta", replace
 
-
-
-
 /***************************************************************************************************
 
 ***************************************************************************************************/
-
-/* timer helpers */
-program define Tic
-	syntax, n(integer)
-	timer on `n'
-end
-
-program define Toc
-	syntax, n(integer) 
-	timer off `n'
-end
-
-
-/***************************************************************************************************
-
-***************************************************************************************************/
-
 
 /* benchmark */
 set processors 2
@@ -195,11 +186,17 @@ Tic, n(`++i')
 reghdfe v3 v2 id4 id5 i.v1, a(id6) vce(cluster id6) tolerance(1e-6)
 Toc, n(`i')
 
-
 gegen g = group(id3)
 Tic, n(`++i')
 reghdfe v3 v2 id4 id5 i.v1, absorb(id6 g) vce(cluster id6)  tolerance(1e-6)
 Toc, n(`i')
+
+/* plot */
+keep if _n <= 1000
+Tic, n(`++i')
+twoway (scatter v2 v1)
+graph export "~/statabenchmark/plot_stata.pdf"
+Tic, n(`++i')
 
 
 drop _all

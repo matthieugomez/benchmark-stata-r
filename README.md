@@ -1,7 +1,7 @@
 # Benchmarks
 
 ## Results
-This page compares the speed of R and Stata for typical data analysis. Instructions are runned on randomly generated datasets of 500 Mo (which corresponds to 1e7 observations). For each data operation, I use the fatest command available in each language. In particular, I use [ftools](https://github.com/sergiocorreia/ftools) and [gtools](https://github.com/mcaceresb/stata-gtools) in Stata. I use [data.table](https://github.com/Rdatatable/data.table) and [fst](https://github.com/fstpackage/fst) in R.
+This page compares the speed of R and Stata for typical data analysis. Instructions are runned on randomly generated datasets of with 10 millions observations. For each data operation, I try to use the fatest command available in each language. In particular, I use [gtools](https://github.com/mcaceresb/stata-gtools) in Stata. I use [data.table](https://github.com/Rdatatable/data.table), [fst](https://github.com/fstpackage/fst), and [fixest](https://github.com/fstpackage/fixe) in R.
 
 
 <img class = "img-responsive"  src="/output/1e7.png" />
@@ -19,7 +19,7 @@ The Stata code in the file [3-benchmark-stata.do](code/3-benchmark-stata.do):
 
 The machine used for this benchmark has a 3.5 GHz Intel Core i5 (4 cores) and a SSD disk.
 
-The Stata version is Stata 16 MP.  The R session info is 
+The Stata version is Stata 16 MP with 2 cores.  The R session info is 
 
 ````R
 R version 3.6.0 (2019-04-26)

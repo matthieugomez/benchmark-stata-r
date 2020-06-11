@@ -1,15 +1,18 @@
 # To run the script, download the relevant packages:
 # install.packages("data.table")
 # install.packages("fst")
-# install.packages("tidyr") ## optional
 # install.packages("statar")
 # install.packages("fixest")
+# install.packages("ggplot")
+
 
 # loading packages
 library(data.table)
 library(fixest)
 library(statar)
 library(fst)
+library(ggplot)
+
 
 # setting options
 options(mc.cores=4)
@@ -99,12 +102,10 @@ DT1 <- unique(DT, by = c("id1", "id2", "id3"))
 DT1 <- DT1[1:(nrow(DT1)/10),]
 i <- i + 1
 names[i] <- "reshape long"
-# out[i] <- time(DT2 <- tidyr::pivot_longer(DT1, cols = c(id4, id5, id6, v1, v2, v3))) ## Another option
 out[i] <- time(DT2 <- melt(DT1, id.vars = c("id1", "id2", "id3")))
 rm(DT1) 
 i <- i + 1
 names[i] <- "reshape wide"
-# out[i] <- time(DT3 <- tidyr::pivot_wider(DT2, names_from=variable, values_from=value)) ## Another option
 out[i] <- time(DT3 <- dcast(DT2, id1 + id2 + id3 ~ variable, value.var = "value"))
 rm(list = c("DT2", "DT3"))
 
@@ -189,6 +190,11 @@ out[i] <- time(feols(v3 ~ v2 + id4 + id5  + as.factor(v1) | id6, DT1)) ## Automa
 i <- i + 1
 names[i] <- "reg 2 hfe"
 out[i] <- time(feols(v3 ~  v2 + id4 + id5  + as.factor(v1) | id6 + id3, DT1)) ## Automatically clusters by id6 too
+
+# plot
+i <- i + 1
+names[i] <- "plot 1000 points"
+ggplot(DT1[1:1000], aes(x = v1, y = v2)) +  geom_point()
 
 # run benchmark
 fwrite(data.table(command = names, result = out), "~/statabenchmark/resultR1e7.csv")
