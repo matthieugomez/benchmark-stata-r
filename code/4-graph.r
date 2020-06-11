@@ -16,6 +16,6 @@ setDT(DT)
 
 
 DT[, command := factor(command, levels=rev(unique(command)))]
-image = ggplot(DT,aes(x=command,y=value, fill = "red", width=0.2)) + geom_bar(position=position_dodge(width=0.2), stat="identity")+ coord_flip() + scale_fill_discrete(breaks=c("Stata","R")) + ylab("Time in Stata Divided by Time in R") +  scale_y_log10(breaks = c(0.1, 1, 10, 100), labels = c("0.1", "1", "10", "100"))
+image = ggplot(DT,aes(x=command,y=value, fill = "red", width=0.2)) + geom_bar(position=position_dodge(width=0.2), stat="identity")+ coord_flip() + scale_fill_discrete(breaks=c("Stata","R")) + ylab("Time spent in Stata (relative to time in R)") +  scale_y_log10(breaks = c(0.1, 1, 10, 100), labels = c("0.1", "1", "10", "100"))
 ggsave("~/statabenchmark/1e7.svg", image)
 ggsave("~/statabenchmark/1e7.png", image)
