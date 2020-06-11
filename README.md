@@ -17,7 +17,7 @@ The Stata code in the file [3-benchmark-stata.do](code/3-benchmark-stata.do):
 
 ## Session Info 
 
-The machine used for this benchmark has a 3.5 GHz Intel Core i5 (4 cores) and a SSD disk.
+The machine used for this benchmark has a 3.5 GHz Intel Core i5 (4 cores) with a SSD disk.
 
 The Stata version is Stata 16 MP with 2 cores.  The R session info is 
 
