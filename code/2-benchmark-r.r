@@ -22,7 +22,7 @@ write.fst(fread("~/statabenchmark/merge_int.csv", data.table = FALSE), "~/statab
 
 
 # define the time function
-time <- function(x){sum(system.time(x)[1:2])}
+time <- function(x){system.time(x)[3]}
 
 
 out <- NULL
