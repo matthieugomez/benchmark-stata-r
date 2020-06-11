@@ -11,7 +11,7 @@ library(data.table)
 library(fixest)
 library(statar)
 library(fst)
-library(ggplot)
+library(ggplot2)
 
 
 # setting options
@@ -67,8 +67,8 @@ setDT(DT)
 f <- function(){
 	DT_merge <- read.fst("~/statabenchmark/merge_string.fst")
 	setDT(DT_merge)
-	setkeyv(DT, c("id1", "id3"))
-	setkeyv(DT_merge, c("id1", "id3")) 
+	setkey(DT, id1, id3)
+	setkey(DT_merge, id1, id3)
 	merge(DT, DT_merge, all.x = TRUE, all.y = FALSE) 
 }
 i <- i + 1
@@ -80,8 +80,8 @@ setDT(DT)
 f <- function(){
 	DT_merge <- read.fst("~/statabenchmark/merge_int.fst")
 	setDT(DT_merge)
-	setkeyv(DT, c("id4", "id6"))
-	setkeyv(DT_merge, c("id4", "id6")) 
+	setkey(DT, id4, id6)
+	setkey(DT_merge, id4, id6)
 	merge(DT, DT_merge, all.x = TRUE, all.y = FALSE) 
 }
 i <- i + 1
@@ -194,7 +194,7 @@ out[i] <- time(feols(v3 ~  v2 + id4 + id5  + as.factor(v1) | id6 + id3, DT1)) ##
 # plot
 i <- i + 1
 names[i] <- "plot 1000 points"
-ggplot(DT1[1:1000], aes(x = v1, y = v2)) +  geom_point()
+out[i] <-  time(ggsave("~/statabenchmark/plot.pdf", ggplot(DT1[1:1000], aes(x = v1, y = v2)) +  geom_point()))
 
 # run benchmark
 fwrite(data.table(command = names, result = out), "~/statabenchmark/resultR1e7.csv")

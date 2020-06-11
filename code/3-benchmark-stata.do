@@ -75,12 +75,10 @@ Tic, n(`++i')
 fmerge m:1 id1 id3 using "~/statabenchmark/merge_string.dta", keep(master matched) nogen
 Toc, n(`i')
 
-
 use "~/statabenchmark/1e7.dta", clear
 Tic, n(`++i')
 fmerge m:1 id4 id6 using "~/statabenchmark/merge_int.dta", keep(master matched) nogen
 Toc, n(`i')
-
 
 /* append */
 use "~/statabenchmark/1e7.dta", clear
@@ -97,6 +95,7 @@ foreach v of varlist id4 id5 id6 v1 v2 v3{
 Tic, n(`++i')
 greshape long v_, i(id1 id2 id3) j(variable) string
 Toc, n(`i')
+
 Tic, n(`++i')
 greshape wide v_, i(id1 id2 id3) j(variable) string
 Toc, n(`i')
@@ -195,17 +194,14 @@ Toc, n(`i')
 keep if _n <= 1000
 Tic, n(`++i')
 twoway (scatter v2 v1)
-graph export "~/statabenchmark/plot_stata.pdf"
-Tic, n(`++i')
-
+graph export "~/statabenchmark/plot_stata.pdf", replace
+Toc, n(`i')
 
 drop _all
 gen result = .
-local i = 1
+set obs `i'
 timer list
-while r(nt`i') < .{
-	set obs `i'
-	replace result = r(t`i') if _n == `i'
-	local i = `i' + 1
+forval j = 1/`i'{
+	replace result = r(t`j') if _n == `j'
 }
 outsheet using "~/statabenchmark/resultStata1e7.csv", replace
