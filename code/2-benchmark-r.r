@@ -1,19 +1,19 @@
 # To run the script, download the relevant packages:
 # install.packages("data.table")
 # install.packages("fst")
-# install.packages("tidyr")
+# install.packages("tidyr") ## optional
 # install.packages("statar")
-# install.packages("lfe")
+# install.packages("fixest")
 
 # loading packages
 library(data.table)
-library(tidyr)
-library(lfe)
+library(fixest)
 library(statar)
 library(fst)
 
 # setting options
 options(mc.cores=4)
+setFixest_nthreads(4)
 
 # creating the file to merge with
 write.fst(fread("~/statabenchmark/merge_string.csv", data.table = FALSE), "~/statabenchmark/merge_string.fst")
@@ -99,11 +99,13 @@ DT1 <- unique(DT, by = c("id1", "id2", "id3"))
 DT1 <- DT1[1:(nrow(DT1)/10),]
 i <- i + 1
 names[i] <- "reshape long"
-out[i] <- time(DT2 <- gather(DT1, variable, value, id4, id5, id6, v1, v2, v3))
+# out[i] <- time(DT2 <- tidyr::pivot_longer(DT1, cols = c(id4, id5, id6, v1, v2, v3))) ## Another option
+out[i] <- time(DT2 <- melt(DT1, id.vars = c("id1", "id2", "id3")))
 rm(DT1) 
 i <- i + 1
 names[i] <- "reshape wide"
-out[i] <- time(DT3 <- spread(DT2, variable, value))
+# out[i] <- time(DT3 <- tidyr::pivot_wider(DT2, names_from=variable, values_from=value)) ## Another option
+out[i] <- time(DT3 <- dcast(DT2, id1 + id2 + id3 ~ variable, value.var = "value"))
 rm(list = c("DT2", "DT3"))
 
 # recode
@@ -177,17 +179,16 @@ out[i] <- time(DT[, list(v1 = mean(v1, na.rm = TRUE), v2 = mean(v2, na.rm = TRUE
 DT1 <- DT[1:(nrow(DT)/2),]
 i <- i + 1
 names[i] <- "reg"
-out[i] <- time(felm(v3 ~ v1 + v2 + id4 + id5, DT1))
+out[i] <- time(feols(v3 ~ v1 + v2 + id4 + id5, DT1))
 i <- i + 1
 names[i] <- "reg fe"
-out[i] <- time(felm(v3 ~ v2 + id4 + id5 + as.factor(v1), DT1))
+out[i] <- time(feols(v3 ~ v2 + id4 + id5 + as.factor(v1), DT1))
 i <- i + 1
 names[i] <- "reg hfe"
-out[i] <- time(felm(v3 ~ v2 + id4 + id5  + as.factor(v1) | id6 | 0 | id6, DT1))
+out[i] <- time(feols(v3 ~ v2 + id4 + id5  + as.factor(v1) | id6, DT1)) ## Automatically clusters by id6 too
 i <- i + 1
 names[i] <- "reg 2 hfe"
-out[i] <- time(felm(v3 ~  v2 + id4 + id5  + as.factor(v1) | id6 + id3 | 0 | id6, DT1))
-
+out[i] <- time(feols(v3 ~  v2 + id4 + id5  + as.factor(v1) | id6 + id3, DT1)) ## Automatically clusters by id6 too
 
 # run benchmark
 fwrite(data.table(command = names, result = out), "~/statabenchmark/resultR1e7.csv")
