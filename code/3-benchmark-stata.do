@@ -3,6 +3,8 @@ To run the script, download the following packages:
 ssc install gtools
 ssc install fastreshape
 ssc install reghdfe
+ssc install autorename
+ssc install ftools
 ***************************************************************************************************/
 /* timer helpers */
 cap program drop Tic
